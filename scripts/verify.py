@@ -131,10 +131,11 @@ def check_site():
                 page_refs.extend(group.get("pages", []))
         missing = 0
         for ref in page_refs:
-            if not (SITE / f"{ref}.mdx").exists():
-                error(f"docs.json references {ref} but {ref}.mdx missing")
+            mdx = SITE / f"{ref}.mdx"
+            if not mdx.exists():
+                error(f"docs.json references {ref} but file missing")
                 missing += 1
-        print(f"  {len(page_refs)} pages referenced, {missing} missing")
+        print(f"  {len(page_refs)} pages, {missing} missing")
 
     print("\n--- static site (github pages) ---")
     index = BUILD / "site" / "index.html"

@@ -53,13 +53,35 @@ def preprocess():
         sys.exit(1)
 
 
+def resolve_section_chapters(section: dict) -> list[tuple[dict, str]]:
+    """Resolve a section to a list of (meta, body) tuples."""
+    source_dir = section["source_dir"]
+    if section.get("order_by") == "date":
+        clean_dir = CLEAN / source_dir
+        if not clean_dir.exists():
+            return []
+        entries = []
+        for f in sorted(clean_dir.glob("*.md")):
+            meta, body = read_clean_file(f"{source_dir}/{f.stem}")
+            if body:
+                entries.append((meta, body))
+        entries.sort(key=lambda e: e[0].get("published", "9999"))
+        return entries
+    else:
+        results = []
+        for ch in section.get("chapters", []):
+            meta, body = read_clean_file(f"{source_dir}/{ch}")
+            if body:
+                results.append((meta, body))
+        return results
+
+
 def assemble():
     """Assemble build/book.md from cleaned files in book order."""
     print("\n=== Assembling book.md ===")
     config = load_config()
     parts_md = []
 
-    # YAML metadata for pandoc
     header = f"""---
 title: "{config['title']}"
 subtitle: "{config['subtitle']}"
@@ -71,50 +93,12 @@ date: "{config['date']}"
     parts_md.append(header)
 
     for part in config["parts"]:
-        part_name = part["name"]
-        parts_md.append(f"\n# {part_name}\n\n")
+        parts_md.append(f"\n# {part['name']}\n\n")
 
-        if part.get("order_by") == "date":
-            # Collect all files from source_dir, sort by date
-            source_dir = part["source_dir"]
-            clean_dir = CLEAN / source_dir
-            if not clean_dir.exists():
-                continue
-            entries = []
-            for f in clean_dir.glob("*.md"):
-                meta, body = read_clean_file(f"{source_dir}/{f.stem}")
-                if body:
-                    entries.append((meta, body, f.stem))
-            # Sort by published date
-            entries.sort(key=lambda e: e[0].get("published", "9999"))
-            for meta, body, stem in entries:
-                title = meta.get("title", stem)
-                author = meta.get("author", "")
-                date = meta.get("published", "")
-                parts_md.append(f"## {title}\n\n")
-                if author or date:
-                    parts_md.append(f"*{author}")
-                    if date:
-                        parts_md.append(f" --- {date}")
-                    parts_md.append("*\n\n")
-                # Demote headings by 2 levels: # -> ###, ## -> ####, etc.
-                body = re.sub(r"^(#{1,5}) ", lambda m: "##" + m.group(1) + " ", body, flags=re.MULTILINE)
-                parts_md.append(body + "\n\n")
-        else:
-            # Explicit chapter list
-            chapters = part.get("chapters", [])
-            source_dir = part.get("source_dir", "")
-            for ch in chapters:
-                if isinstance(ch, dict):
-                    sd = ch.get("source_dir", source_dir)
-                    fname = ch["file"]
-                else:
-                    sd = source_dir
-                    fname = ch
-                meta, body = read_clean_file(f"{sd}/{fname}")
-                if not body:
-                    continue
-                title = meta.get("title", fname)
+        for section in part.get("sections", []):
+            entries = resolve_section_chapters(section)
+            for meta, body in entries:
+                title = meta.get("title", "Untitled")
                 author = meta.get("author", part.get("author", ""))
                 date = meta.get("published", "")
                 parts_md.append(f"## {title}\n\n")
@@ -123,7 +107,6 @@ date: "{config['date']}"
                     if date:
                         parts_md.append(f" --- {date}")
                     parts_md.append("*\n\n")
-                # Demote headings by 2 levels: # -> ###, ## -> ####, etc.
                 body = re.sub(r"^(#{1,5}) ", lambda m: "##" + m.group(1) + " ", body, flags=re.MULTILINE)
                 parts_md.append(body + "\n\n")
 
@@ -196,68 +179,77 @@ def build_mintlify_site():
     print("\n=== Building Mintlify site ===")
     config = load_config()
 
-    dir_map = {
-        "agentic-patterns": "guide",
-        "simonwillison": "blog",
-    }
-    default_site_dir = "voices"
-
-    for d in ["guide", "blog", "voices"]:
-        target = SITE / d
-        if target.exists():
-            shutil.rmtree(target)
-        target.mkdir(parents=True)
+    # Clean content dirs under site/
+    for d in SITE.iterdir():
+        if d.is_dir() and d.name not in (".mintlify", "images", "logo"):
+            shutil.rmtree(d)
 
     navigation_tabs = []
     page_count = 0
 
     for part in config["parts"]:
         part_name = part["name"]
-        source_dir = part.get("source_dir", "")
-        site_subdir = dir_map.get(source_dir, default_site_dir)
-        groups = []
+        # Use a slug for the site subdirectory
+        part_slug = re.sub(r"[^a-z0-9]+", "-", part_name.lower()).strip("-")
+        part_dir = SITE / part_slug
+        part_dir.mkdir(parents=True, exist_ok=True)
 
-        if part.get("order_by") == "date":
-            clean_dir = CLEAN / source_dir
-            if not clean_dir.exists():
-                continue
-            entries = []
-            for f in sorted(clean_dir.glob("*.md")):
-                meta, body = read_clean_file(f"{source_dir}/{f.stem}")
-                entries.append((meta, body, f.stem))
-            entries.sort(key=lambda e: e[0].get("published", "9999"))
-            pages = []
-            for meta, body, stem in entries:
-                write_mdx(SITE / site_subdir / f"{stem}.mdx", meta, body)
-                pages.append(f"{site_subdir}/{stem}")
-                page_count += 1
-            groups.append({"group": part.get("author", part_name), "pages": pages})
-        else:
-            chapters = part.get("chapters", [])
-            pages = []
-            for ch in chapters:
-                if isinstance(ch, dict):
-                    sd = ch.get("source_dir", source_dir)
-                    fname = ch["file"]
-                    sub = dir_map.get(sd, default_site_dir)
-                else:
-                    sd = source_dir
-                    fname = ch
-                    sub = site_subdir
-                meta, body = read_clean_file(f"{sd}/{fname}")
-                if body:
-                    write_mdx(SITE / sub / f"{fname}.mdx", meta, body)
-                    pages.append(f"{sub}/{fname}")
+        groups = []
+        for section in part.get("sections", []):
+            source_dir = section["source_dir"]
+            group_name = section["group"]
+
+            if section.get("order_by") == "date":
+                clean_dir = CLEAN / source_dir
+                if not clean_dir.exists():
+                    continue
+                entries = []
+                for f in sorted(clean_dir.glob("*.md")):
+                    meta, body = read_clean_file(f"{source_dir}/{f.stem}")
+                    if body:
+                        entries.append((meta, body, f.stem))
+                entries.sort(key=lambda e: e[0].get("published", "9999"))
+                pages = []
+                for meta, body, stem in entries:
+                    write_mdx(part_dir / f"{stem}.mdx", meta, body)
+                    pages.append(f"{part_slug}/{stem}")
                     page_count += 1
-            groups.append({"group": part_name, "pages": pages})
+                groups.append({"group": group_name, "pages": pages})
+            else:
+                pages = []
+                for ch in section.get("chapters", []):
+                    meta, body = read_clean_file(f"{source_dir}/{ch}")
+                    if body:
+                        write_mdx(part_dir / f"{ch}.mdx", meta, body)
+                        pages.append(f"{part_slug}/{ch}")
+                        page_count += 1
+                groups.append({"group": group_name, "pages": pages})
 
         navigation_tabs.append({"tab": part_name, "groups": groups})
 
     docs_config = {
-        "name": config["title"],
+        "$schema": "https://mintlify.com/docs.json",
+        "name": "hitch",
         "theme": "quill",
-        "navigation": {"tabs": navigation_tabs},
+        "colors": {
+            "primary": "#6366f1",
+            "light": "#818cf8",
+            "dark": "#4f46e5",
+        },
+        "navigation": {
+            "tabs": navigation_tabs,
+            "global": {
+                "anchors": [
+                    {"anchor": "github", "href": "https://github.com/lmist/hitch", "icon": "github"},
+                ],
+            },
+        },
         "appearance": {"default": "light"},
+        "footer": {
+            "socials": {
+                "github": "https://github.com/lmist/hitch",
+            },
+        },
     }
     docs_json = SITE / "docs.json"
     docs_json.write_text(json.dumps(docs_config, indent=2))

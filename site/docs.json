@@ -1,102 +1,117 @@
 {
-  "name": "Agentic Engineering",
+  "$schema": "https://mintlify.com/docs.json",
+  "name": "hitch",
   "theme": "quill",
+  "colors": {
+    "primary": "#6366f1",
+    "light": "#818cf8",
+    "dark": "#4f46e5"
+  },
   "navigation": {
     "tabs": [
       {
-        "tab": "Agentic Engineering Patterns",
+        "tab": "Simon Willison",
         "groups": [
           {
             "group": "Agentic Engineering Patterns",
             "pages": [
-              "guide/what-is-agentic-engineering",
-              "guide/code-is-cheap",
-              "guide/hoard-things-you-know-how-to-do",
-              "guide/better-code",
-              "guide/anti-patterns",
-              "guide/how-coding-agents-work",
-              "guide/using-git-with-coding-agents",
-              "guide/subagents",
-              "guide/red-green-tdd",
-              "guide/first-run-the-tests",
-              "guide/agentic-manual-testing",
-              "guide/linear-walkthroughs",
-              "guide/interactive-explanations",
-              "guide/gif-optimization",
-              "guide/prompts"
+              "simon-willison/what-is-agentic-engineering",
+              "simon-willison/code-is-cheap",
+              "simon-willison/hoard-things-you-know-how-to-do",
+              "simon-willison/better-code",
+              "simon-willison/anti-patterns",
+              "simon-willison/how-coding-agents-work",
+              "simon-willison/using-git-with-coding-agents",
+              "simon-willison/subagents",
+              "simon-willison/red-green-tdd",
+              "simon-willison/first-run-the-tests",
+              "simon-willison/agentic-manual-testing",
+              "simon-willison/linear-walkthroughs",
+              "simon-willison/interactive-explanations",
+              "simon-willison/gif-optimization",
+              "simon-willison/prompts"
+            ]
+          },
+          {
+            "group": "Blog Posts",
+            "pages": [
+              "simon-willison/niche-museums-kepler",
+              "simon-willison/better-presentations",
+              "simon-willison/the-perfect-commit",
+              "simon-willison/annotated-presentations",
+              "simon-willison/ai-in-2023",
+              "simon-willison/claude-and-chatgpt-case-study",
+              "simon-willison/building-c-extensions-for-sqlite-with-chatgpt-code-interpreter",
+              "simon-willison/ocr-pdfs-images",
+              "simon-willison/slop",
+              "simon-willison/michael-wooldridge",
+              "simon-willison/llms-in-2024",
+              "simon-willison/a-computer-can-never-be-held-accountable",
+              "simon-willison/vibe-coding",
+              "simon-willison/gemini-image-segmentation",
+              "simon-willison/six-months-in-llms",
+              "simon-willison/the-lethal-trifecta",
+              "simon-willison/vibe-scraping",
+              "simon-willison/sloccount-in-webassembly",
+              "simon-willison/claude-code-for-web-video",
+              "simon-willison/github-universe-badge",
+              "simon-willison/async-code-research",
+              "simon-willison/html-tools",
+              "simon-willison/code-proven-to-work",
+              "simon-willison/the-year-in-llms",
+              "simon-willison/inflection",
+              "simon-willison/kakapo-mug",
+              "simon-willison/gemini-31-pro",
+              "simon-willison/agentic-engineering-patterns",
+              "simon-willison/present"
             ]
           }
         ]
       },
       {
-        "tab": "Blog Posts",
+        "tab": "Anthropic",
         "groups": [
           {
-            "group": "Simon Willison",
+            "group": "Introduction to Agent Skills",
             "pages": [
-              "blog/niche-museums-kepler",
-              "blog/better-presentations",
-              "blog/the-perfect-commit",
-              "blog/annotated-presentations",
-              "blog/ai-in-2023",
-              "blog/claude-and-chatgpt-case-study",
-              "blog/building-c-extensions-for-sqlite-with-chatgpt-code-interpreter",
-              "blog/ocr-pdfs-images",
-              "blog/slop",
-              "blog/michael-wooldridge",
-              "blog/llms-in-2024",
-              "blog/a-computer-can-never-be-held-accountable",
-              "blog/vibe-coding",
-              "blog/gemini-image-segmentation",
-              "blog/six-months-in-llms",
-              "blog/the-lethal-trifecta",
-              "blog/vibe-scraping",
-              "blog/sloccount-in-webassembly",
-              "blog/claude-code-for-web-video",
-              "blog/github-universe-badge",
-              "blog/async-code-research",
-              "blog/html-tools",
-              "blog/code-proven-to-work",
-              "blog/the-year-in-llms",
-              "blog/inflection",
-              "blog/kakapo-mug",
-              "blog/gemini-31-pro",
-              "blog/agentic-engineering-patterns",
-              "blog/present"
+              "anthropic/01-what-are-skills",
+              "anthropic/02-creating-your-first-skill",
+              "anthropic/03-configuration-and-multi-file-skills",
+              "anthropic/04-skills-vs-other-features",
+              "anthropic/05-sharing-skills",
+              "anthropic/06-troubleshooting-skills"
             ]
           }
         ]
       },
       {
-        "tab": "Agent Skills",
+        "tab": "@systematicls",
         "groups": [
           {
-            "group": "Agent Skills",
+            "group": "Posts",
             "pages": [
-              "voices/01-what-are-skills",
-              "voices/02-creating-your-first-skill",
-              "voices/03-configuration-and-multi-file-skills",
-              "voices/04-skills-vs-other-features",
-              "voices/05-sharing-skills",
-              "voices/06-troubleshooting-skills"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "Other Voices",
-        "groups": [
-          {
-            "group": "Other Voices",
-            "pages": [
-              "voices/sysls-how-to-become-worldclass-agentic-engineer"
+              "systematicls/sysls-how-to-become-worldclass-agentic-engineer"
             ]
           }
         ]
       }
-    ]
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "github",
+          "href": "https://github.com/lmist/hitch",
+          "icon": "github"
+        }
+      ]
+    }
   },
   "appearance": {
     "default": "light"
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/lmist/hitch"
+    }
   }
 }
