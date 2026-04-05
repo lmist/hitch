@@ -8,17 +8,19 @@
 
 <p align="center">
   <a href="https://github.com/lmist/hitch/actions/workflows/build.yml"><img src="https://github.com/lmist/hitch/actions/workflows/build.yml/badge.svg" alt="build"></a>
-</p>
-
-<p align="center">
-  pdf (light &amp; dark) · epub · markdown · mintlify site
+  <a href="https://mintlify.com"><img src="https://img.shields.io/badge/docs-mintlify-6366f1?logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMkw0IDdWMTdMOSAyMEwyMCAxNFYzTDEyIDJaIiBmaWxsPSIjZmZmIi8+PC9zdmc+" alt="docs"></a>
+  <img src="https://img.shields.io/badge/license-mit-22c55e" alt="license">
+  <img src="https://img.shields.io/badge/authors-3-3b82f6" alt="authors">
+  <img src="https://img.shields.io/badge/chapters-51-3b82f6" alt="chapters">
+  <img src="https://img.shields.io/badge/formats-pdf%20%C2%B7%20epub%20%C2%B7%20md-f97316" alt="formats">
+  <img src="https://img.shields.io/badge/make-old%20school-1a1a1a" alt="make">
 </p>
 
 ---
 
 ## what is this?
 
-a curated multi-format book compiled from the best writing on agentic engineering. guides, blog posts, courses, and community writing — one buildable collection, five output formats.
+a curated multi-format book compiled from the best writing on agentic engineering. guides, blog posts, courses, and community writing — one buildable collection, four output formats.
 
 | format | use case |
 |--------|----------|
@@ -26,24 +28,20 @@ a curated multi-format book compiled from the best writing on agentic engineerin
 | **pdf (dark)** | catppuccin mocha theme for screen reading |
 | **epub** | ibooks / kindle / any e-reader |
 | **markdown** | feed into llms, import into obsidian |
-| **mintlify site** | browsable docs site (deployed by mintlify from the repo) |
-| **static site** | github pages fallback |
+| **mintlify** | browsable docs site, deployed from the repo |
 
 one command rebuilds everything: `make all`
 
 ## contents
 
-### part i — agentic engineering patterns
-simon willison's comprehensive guide to working with coding agents like claude code and codex. 15 chapters covering principles, workflows, testing, and annotated prompts.
+### simon willison
+15-chapter agentic engineering patterns guide + 29 selected blog posts spanning 2019–2026.
 
-### part ii — blog posts
-29 selected posts by simon willison spanning 2019–2026, from "the perfect commit" to "2025: the year in llms." chronologically ordered.
+### anthropic
+6-lesson "introduction to agent skills" course from anthropic academy.
 
-### part iii — agent skills
-anthropic academy's 6-lesson course on building, configuring, and sharing skills in claude code.
-
-### part iv — other voices
-community perspectives, starting with @systematicls' "how to be a world-class agentic engineer."
+### @systematicls
+"how to be a world-class agentic engineer" — originally published on x.
 
 ## dependencies
 
@@ -51,7 +49,7 @@ community perspectives, starting with @systematicls' "how to be a world-class ag
 - [python 3](https://python.org) + [pyyaml](https://pypi.org/project/PyYAML/) — build pipeline
 - [pandoc](https://pandoc.org) — document conversion
 - [texlive](https://tug.org/texlive/) (lualatex) — pdf typesetting
-- [mintlify](https://mintlify.com) cli (optional) — web site preview
+- [mintlify](https://mintlify.com) cli — local site preview (`mint dev`)
 
 ## quick start
 
@@ -62,7 +60,7 @@ make all
 # individual formats
 make pdf        # light + dark pdfs
 make epub       # epub for e-readers
-make site       # mintlify site + static html
+make site       # mintlify mdx site
 make verify     # run checks
 
 # add a new post by url
@@ -71,7 +69,7 @@ make add URL=https://simonwillison.net/2025/Mar/19/vibe-coding/
 # or with a custom author directory
 make add URL=https://example.com/post AUTHOR=someperson
 
-# preview the site locally
+# preview the mintlify site locally
 make dev
 ```
 
@@ -96,8 +94,9 @@ hitch/
     preprocess.py           strip boilerplate, extract metadata
     verify.py               post-build validation
     add-source.ts           add new content by url (bun)
+  site/                     mintlify site (mdx + docs.json)
   .github/workflows/
-    build.yml               ci: build all formats, deploy to pages
+    build.yml               ci: build + verify all formats
   Makefile                  build targets (we old school)
 ```
 
@@ -105,7 +104,7 @@ hitch/
 
 1. **preprocess** — raw crawled markdown gets boilerplate stripped (site headers, footers, nav, sponsor text) and yaml frontmatter injected with title, author, date, and source url.
 2. **assemble** — cleaned chapters are concatenated in book order into a single `book.md` with part/chapter structure.
-3. **build** — pandoc converts to pdf (via lualatex) and epub. mintlify site is generated as mdx files (mintlify deploys from the repo). static html fallback for github pages.
+3. **build** — pandoc converts to pdf (via lualatex) and epub. mintlify site is generated as mdx files that mintlify deploys from the repo.
 4. **verify** — automated checks for boilerplate leaks, missing frontmatter, valid outputs, and site integrity.
 
 ## adding content

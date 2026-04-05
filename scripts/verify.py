@@ -137,16 +137,6 @@ def check_site():
                 missing += 1
         print(f"  {len(page_refs)} pages, {missing} missing")
 
-    print("\n--- static site (github pages) ---")
-    index = BUILD / "site" / "index.html"
-    if not index.exists():
-        warn("build/site/index.html missing")
-    else:
-        size = index.stat().st_size / 1024
-        print(f"  index.html: {size:.0f}KB")
-        if size < 50:
-            error("index.html suspiciously small")
-
 
 def main():
     print("=== Verification ===")

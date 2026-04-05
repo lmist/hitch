@@ -21,7 +21,7 @@ clean:
 	rm -rf build/
 
 dev: site
-	cd build/site && python3 -m http.server 3000
+	cd site && mint dev
 
 add:
 	@test -n "$(URL)" || (echo "usage: make add URL=https://..." && exit 1)

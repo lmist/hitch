@@ -169,9 +169,8 @@ def build_epub(book_md: Path):
 
 
 def build_site():
-    """Generate Mintlify site + static HTML fallback for GitHub Pages."""
+    """Generate Mintlify MDX site."""
     build_mintlify_site()
-    build_static_site()
 
 
 def build_mintlify_site():
@@ -267,39 +266,6 @@ def write_mdx(path: Path, meta: dict, body: str):
         fm["date"] = meta["published"]
     frontmatter = yaml.dump(fm, default_flow_style=False, allow_unicode=True).strip()
     path.write_text(f"---\n{frontmatter}\n---\n\n{body}\n")
-
-
-def build_static_site():
-    """Generate a static HTML site for GitHub Pages fallback."""
-    print("\n=== Building static site (github pages) ===")
-    site_out = BUILD / "site"
-    if site_out.exists():
-        shutil.rmtree(site_out)
-    site_out.mkdir(parents=True)
-
-    book_md = BUILD / "book.md"
-    index_html = site_out / "index.html"
-
-    cmd = [
-        "pandoc", str(book_md),
-        "-o", str(index_html),
-        "--standalone",
-        "--toc", "--toc-depth=2",
-        "--top-level-division=chapter",
-        "--metadata", "title=the hitchhiker's guide to agentic engineering",
-        "--css", "style.css",
-        "--template", str(TEMPLATES / "site.html"),
-    ]
-    result = subprocess.run(cmd, cwd=str(ROOT), capture_output=True, text=True)
-    if result.returncode != 0:
-        print(f"  FAILED: {result.stderr[-500:]}")
-        return False
-
-    css_src = TEMPLATES / "site.css"
-    if css_src.exists():
-        shutil.copy(css_src, site_out / "style.css")
-
-    print(f"  OK: {index_html} ({index_html.stat().st_size / 1024:.0f}KB)")
 
 
 def main():
