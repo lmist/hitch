@@ -1,0 +1,172 @@
+# [Simon Willison’s Weblog](/)
+
+[Subscribe](https://simonwillison.net/2025/Oct/28/github-universe-badge/about/#subscribe) 
+
+**Sponsored by:** [WorkOS](https://fandf.co/4v8pTAt) — Production-ready APIs for auth and access control, so you can ship faster.
+
+## Hacking the WiFi-enabled color screen GitHub Universe conference badge
+
+28th October 2025
+
+I’m at [GitHub Universe](https://githubuniverse.com/) this week (thanks to a free ticket from Microsoft). Yesterday I picked up my conference badge... which incorporates a ~~full Raspberry Pi~~ Raspberry Pi Pico microcontroller with a battery, color screen, WiFi and bluetooth.
+
+GitHub Universe has a tradition of hackable conference badges—the badge last year had an eInk display. This year’s is a huge upgrade though—a color screen and WiFI connection makes this thing a genuinely useful little computer!
+
+![Photo of the badge - it has a color screen with six app icons](https://static.simonwillison.net/static/2025/gitub-universe-badge.jpg)
+
+The only thing it’s missing is a keyboard—the device instead provides five buttons total—Up, Down, A, B, C. It might be possible to get a bluetooth keyboard to work though I’ll believe that when I see it—there’s not a lot of space on this device for a keyboard driver.
+
+Everything is written using MicroPython, and the device is designed to be hackable: connect it to a laptop with a USB-C cable and you can start modifying the code directly on the device.
+
+#### Getting setup with the badge [#](https://simonwillison.net/2025/Oct/28/github-universe-badge/2025/Oct/28/github-universe-badge/#getting-setup-with-the-badge)
+
+Out of the box the badge will play an opening animation (implemented as a sequence of PNG image frames) and then show a home screen with six app icons.
+
+The default apps are mostly neat Octocat-themed demos: a flappy-bird clone, a tamagotchi-style pet, a drawing app that works like an etch-a-sketch, an IR scavenger hunt for the conference venue itself (this thing has an IR sensor too!), and a gallery app showing some images.
+
+The sixth app is a badge app. This will show your GitHub profile image and some basic stats, but will only work if you dig out a USB-C cable and make some edits to the files on the badge directly.
+
+I did this on a Mac. I plugged a USB-C cable into the badge which caused MacOS to treat it as an attached drive volume. In that drive are several files including `secrets.py`. Open that up, confirm the WiFi details are correct and add your GitHub username. The file should look like this:
+
+WIFI_SSID = "..."
+WIFI_PASSWORD = "..."
+GITHUB_USERNAME = "simonw"
+
+The badge comes with the SSID and password for the GitHub Universe WiFi network pre-populated.
+
+That’s it! Unmount the disk, hit the reboot button on the back of the badge and when it comes back up again the badge app should look something like this:
+
+![Badge shows my GitHub avatar, plus 10,947 followers, 4,083 contribs, 893 repos](https://static.simonwillison.net/static/2025/badge-profile.jpg)
+
+#### Building your own apps [#](https://simonwillison.net/2025/Oct/28/github-universe-badge/2025/Oct/28/github-universe-badge/#building-your-own-apps)
+
+Here’s [the official documentation](https://badger.github.io/) for building software for the badge.
+
+When I got mine yesterday the official repo had not yet been updated, so I had to figure this out myself.
+
+I copied all of the code across to my laptop, added it to a Git repo and then fired up Claude Code and told it:
+
+> `Investigate this code and add a detailed README`
+
+Here’s [the result](https://github.com/simonw/github-universe-2025-badge/blob/15773c7a53275e7836216c3aa9a8a781c06f7859/README.md), which was really useful for getting a start on understanding how it all worked.
+
+Each of the six default apps lives in a `apps/` folder, for example [apps/sketch/](https://github.com/simonw/github-universe-2025-badge/tree/main/apps/sketch) for the sketching app.
+
+There’s also a menu app which powers the home screen. That lives in [apps/menu/](https://github.com/simonw/github-universe-2025-badge/tree/main/apps/menu). You can edit code in here to add new apps that you create to that screen.
+
+I told Claude:
+
+> `Add a new app to it available from the menu which shows network status and other useful debug info about the machine it is running on`
+
+This was a bit of a long-shot, but it totally worked!
+
+The first version had an error:
+
+![A stacktrace! file badgeware.py line 510 has a list index out of range error.](https://static.simonwillison.net/static/2025/badge-error.jpg)
+
+I OCRd that photo (with the Apple Photos app) and pasted the message into Claude Code and it fixed the problem.
+
+This almost worked... but the addition of a seventh icon to the 2x3 grid meant that you could select the icon but it didn’t scroll into view. I had Claude [fix that for me too](https://github.com/simonw/github-universe-2025-badge/commit/2a60f75db101dc1dc7568ff466ad5c97dc86b336).
+
+Here’s the code for [apps/debug/\_\_init\_\_.py](https://github.com/simonw/github-universe-2025-badge/blob/main/apps/debug/%5F%5Finit%5F%5F.py), and [the full Claude Code transcript](https://gistpreview.github.io/?276d3e0c6566ddbc93adc7020ef6b439) created using my terminal-to-HTML app [described here](https://simonwillison.net/2025/Oct/23/claude-code-for-web-video/).
+
+Here are the four screens of the debug app:
+
+![Network info, showing WiFi network details and IP address](https://static.simonwillison.net/static/2025/badge-debug-network.jpg)
+
+![Storage screen, it has 1MB total, 72BK used. Usage 7%. CMD is /system/apps/debug](https://static.simonwillison.net/static/2025/badge-debug-storage.jpg)
+
+![System: Platform rp2, Python 1.26.0, CPU freq 200MHz, Uptime 13m46s](https://static.simonwillison.net/static/2025/badge-debug-system.jpg)
+
+![Memory info - 100KB used, 241KB total, and a usage bar. Press B to run GC.](https://static.simonwillison.net/static/2025/badge-debug-memory.jpg)
+
+#### An icon editor [#](https://simonwillison.net/2025/Oct/28/github-universe-badge/2025/Oct/28/github-universe-badge/#an-icon-editor)
+
+The icons used on the app are 24x24 pixels. I decided it would be neat to have a web app that helps build those icons, including the ability to start by creating an icon from an emoji.
+
+I bulit this one [using Claude Artifacts](https://claude.ai/share/ca05bd58-859e-4ceb-b5c7-7428b348df3c). Here’s the result, now available at [tools.simonwillison.net/icon-editor](https://tools.simonwillison.net/icon-editor):
+
+![A stacktrace! file badgeware.py line 510 has a list index out of range error.](https://static.simonwillison.net/static/2025/icon-editor.jpg)
+
+#### And a REPL [#](https://simonwillison.net/2025/Oct/28/github-universe-badge/2025/Oct/28/github-universe-badge/#and-a-repl)
+
+I noticed that last year’s badge configuration app (which I can’t find in [github.com/badger/badger.github.io](https://github.com/badger/badger.github.io/) any more, I think they reset the history on that repo?) worked by talking to MicroPython over the Web Serial API from Chrome. Here’s [my archived copy of that code](https://github.com/simonw/2004-badger.github.io/blob/e3501d631a987bfbc12d93c9e35bf2c64e55d052/public/script.js#L305-L394).
+
+Wouldn’t it be useful to have a REPL in a web UI that you could use to interact with the badge directly over USB?
+
+I pointed Claude Code at a copy of that repo and told it:
+
+> `Based on this build a new HTML with inline JavaScript page that uses WebUSB to simply test that the connection to the badge works and then list files on that device using the same mechanism`
+
+It took a bit of poking (here’s [the transcript](https://gistpreview.github.io/?13d93a9e3b0ce1c921cd20303f2f1d84)) but the result is now live at [tools.simonwillison.net/badge-repl](https://tools.simonwillison.net/badge-repl). It only works in Chrome—you’ll need to plug the badge in with a USB-C cable and then click “Connect to Badge”.
+
+![Badge Interactive REPL. Note: This tool requires the Web Serial API (Chrome/Edge on desktop). Connect to Badge, Disconnect and Clear Terminal buttons. Then a REPL interface displaying: Ready to connect. Click "Connect to Badge" to start.Traceback (most recent call last):ddae88e91.dirty on 2025-10-20; GitHub Badger with RP2350 Type "help()" for more information.  >>>  MicroPython v1.14-5485.gddae88e91.dirty on 2025-10-20; GitHub Badger with RP2350 Type "help()" for more information. >>> os.listdir() ['icon.py', 'ui.py', 'init.py', '._init.py', '._icon.py'] >>> machine.freq() 200000000 >>> gc.mem_free() 159696 >>> help() Welcome to MicroPython!](https://static.simonwillison.net/static/2025/badge-repl.jpg)
+
+#### Get hacking [#](https://simonwillison.net/2025/Oct/28/github-universe-badge/2025/Oct/28/github-universe-badge/#get-hacking)
+
+If you’re a GitHub Universe attendee I hope this is useful. The official [badger.github.io](https://badger.github.io/) site has plenty more details to help you get started.
+
+There isn’t yet a way to get hold of this hardware outside of GitHub Universe—I know they had some supply chain challenges just getting enough badges for the conference attendees!
+
+It’s a very neat device, built for GitHub by [Pimoroni](https://www.pimoroni.com/) in Sheffield, UK. A version of this should become generally available in the future under the name “Pimoroni Tufty 2350”.
+
+#### Update: Setup with iPhone only [#](https://simonwillison.net/2025/Oct/28/github-universe-badge/2025/Oct/28/github-universe-badge/#iphone-only)
+
+If you don’t have a laptop with you it’s still possible to start hacking on the device using just a USB-C cable.
+
+Plug the badge into the phone, hit the reset button on the back twice to switch it into disk mode and open the iPhone Files app—the badge should appear as a mounted disk called BADGER.
+
+I used [Textastic](https://apps.apple.com/us/app/textastic-code-editor/id1049254261) to edit that `secrets.py` and configure a new badge, then hit reset again to restart it.
+
+Posted [28th October 2025](https://simonwillison.net/2025/Oct/28/github-universe-badge/2025/Oct/28/) at 5:17 pm · Follow me on [Mastodon](https://fedi.simonwillison.net/@simon), [Bluesky](https://bsky.app/profile/simonwillison.net), [Twitter](https://twitter.com/simonw) or [subscribe to my newsletter](https://simonwillison.net/about/#subscribe)
+
+## More recent articles
+
+* [The Axios supply chain attack used individually targeted social engineering](https://simonwillison.net/2025/Oct/28/github-universe-badge/2026/Apr/3/supply-chain-social-engineering/) \- 3rd April 2026
+* [Highlights from my conversation about agentic engineering on Lenny's Podcast](https://simonwillison.net/2025/Oct/28/github-universe-badge/2026/Apr/2/lennys-podcast/) \- 2nd April 2026
+* [Mr. Chatterbox is a (weak) Victorian-era ethically trained model you can run on your own computer](https://simonwillison.net/2025/Oct/28/github-universe-badge/2026/Mar/30/mr-chatterbox/) \- 30th March 2026
+
+This is **Hacking the WiFi-enabled color screen GitHub Universe conference badge** by Simon Willison, posted on [28th October 2025](https://simonwillison.net/2025/Oct/28/github-universe-badge/2025/Oct/28/).
+
+[ github183 ](https://simonwillison.net/2025/Oct/28/github-universe-badge/tags/github/) [ hardware-hacking8 ](https://simonwillison.net/2025/Oct/28/github-universe-badge/tags/hardware-hacking/) [ microsoft126 ](https://simonwillison.net/2025/Oct/28/github-universe-badge/tags/microsoft/) [ ai1947 ](https://simonwillison.net/2025/Oct/28/github-universe-badge/tags/ai/) [ generative-ai1728 ](https://simonwillison.net/2025/Oct/28/github-universe-badge/tags/generative-ai/) [ raspberry-pi5 ](https://simonwillison.net/2025/Oct/28/github-universe-badge/tags/raspberry-pi/) [ llms1695 ](https://simonwillison.net/2025/Oct/28/github-universe-badge/tags/llms/) [ claude-code103 ](https://simonwillison.net/2025/Oct/28/github-universe-badge/tags/claude-code/) [ disclosures6 ](https://simonwillison.net/2025/Oct/28/github-universe-badge/tags/disclosures/) 
+
+**Next:** [New prompt injection papers: Agents Rule of Two and The Attacker Moves Second](https://simonwillison.net/2025/Oct/28/github-universe-badge/2025/Nov/2/new-prompt-injection-papers/)
+
+**Previous:** [Video: Building a tool to copy-paste share terminal sessions using Claude Code for web](https://simonwillison.net/2025/Oct/28/github-universe-badge/2025/Oct/23/claude-code-for-web-video/)
+
+###  Monthly briefing
+
+ Sponsor me for **$10/month** and get a curated email digest of the month's most important LLM developments.
+
+ Pay me to send you less!
+
+[ Sponsor & subscribe](https://github.com/sponsors/simonw/) 
+
+* [Disclosures](https://simonwillison.net/2025/Oct/28/github-universe-badge/about/#disclosures)
+* [Colophon](https://simonwillison.net/2025/Oct/28/github-universe-badge/about/#about-site)
+* ©
+* [2002](https://simonwillison.net/2025/Oct/28/github-universe-badge/2002/)
+* [2003](https://simonwillison.net/2025/Oct/28/github-universe-badge/2003/)
+* [2004](https://simonwillison.net/2025/Oct/28/github-universe-badge/2004/)
+* [2005](https://simonwillison.net/2025/Oct/28/github-universe-badge/2005/)
+* [2006](https://simonwillison.net/2025/Oct/28/github-universe-badge/2006/)
+* [2007](https://simonwillison.net/2025/Oct/28/github-universe-badge/2007/)
+* [2008](https://simonwillison.net/2025/Oct/28/github-universe-badge/2008/)
+* [2009](https://simonwillison.net/2025/Oct/28/github-universe-badge/2009/)
+* [2010](https://simonwillison.net/2025/Oct/28/github-universe-badge/2010/)
+* [2011](https://simonwillison.net/2025/Oct/28/github-universe-badge/2011/)
+* [2012](https://simonwillison.net/2025/Oct/28/github-universe-badge/2012/)
+* [2013](https://simonwillison.net/2025/Oct/28/github-universe-badge/2013/)
+* [2014](https://simonwillison.net/2025/Oct/28/github-universe-badge/2014/)
+* [2015](https://simonwillison.net/2025/Oct/28/github-universe-badge/2015/)
+* [2016](https://simonwillison.net/2025/Oct/28/github-universe-badge/2016/)
+* [2017](https://simonwillison.net/2025/Oct/28/github-universe-badge/2017/)
+* [2018](https://simonwillison.net/2025/Oct/28/github-universe-badge/2018/)
+* [2019](https://simonwillison.net/2025/Oct/28/github-universe-badge/2019/)
+* [2020](https://simonwillison.net/2025/Oct/28/github-universe-badge/2020/)
+* [2021](https://simonwillison.net/2025/Oct/28/github-universe-badge/2021/)
+* [2022](https://simonwillison.net/2025/Oct/28/github-universe-badge/2022/)
+* [2023](https://simonwillison.net/2025/Oct/28/github-universe-badge/2023/)
+* [2024](https://simonwillison.net/2025/Oct/28/github-universe-badge/2024/)
+* [2025](https://simonwillison.net/2025/Oct/28/github-universe-badge/2025/)
+* [2026](https://simonwillison.net/2025/Oct/28/github-universe-badge/2026/)

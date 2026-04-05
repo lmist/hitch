@@ -1,0 +1,46 @@
+title: "Agentic Engineering"
+subtitle: "Patterns, Practices, and Perspectives"
+editor: "Lou"
+date: "April 2026"
+
+parts:
+  - name: "Agentic Engineering Patterns"
+    author: "Simon Willison"
+    source_dir: "agentic-patterns"
+    chapters:
+      - what-is-agentic-engineering
+      - code-is-cheap
+      - hoard-things-you-know-how-to-do
+      - better-code
+      - anti-patterns
+      - how-coding-agents-work
+      - using-git-with-coding-agents
+      - subagents
+      - red-green-tdd
+      - first-run-the-tests
+      - agentic-manual-testing
+      - linear-walkthroughs
+      - interactive-explanations
+      - gif-optimization
+      - prompts
+
+  - name: "Blog Posts"
+    author: "Simon Willison"
+    source_dir: "simonwillison"
+    order_by: "date"
+
+  - name: "Agent Skills"
+    author: "Anthropic Academy"
+    source_dir: "anthropic-academy"
+    chapters:
+      - 01-what-are-skills
+      - 02-creating-your-first-skill
+      - 03-configuration-and-multi-file-skills
+      - 04-skills-vs-other-features
+      - 05-sharing-skills
+      - 06-troubleshooting-skills
+
+  - name: "Other Voices"
+    chapters:
+      - source_dir: "sysls"
+        file: "sysls-how-to-become-worldclass-agentic-engineer"

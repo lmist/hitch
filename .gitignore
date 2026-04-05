@@ -1,0 +1,9 @@
+build/
+site/.mintlify/
+site/guide/
+site/blog/
+site/voices/
+site/docs.json
+.env
+.playwright-mcp/
+prompt.md
