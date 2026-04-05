@@ -97,8 +97,8 @@ date: "{config['date']}"
                     if date:
                         parts_md.append(f" --- {date}")
                     parts_md.append("*\n\n")
-                # Demote headings: ## -> ###, ### -> ####, etc.
-                body = re.sub(r"^(#{2,5}) ", lambda m: "#" + m.group(1) + " ", body, flags=re.MULTILINE)
+                # Demote headings by 2 levels: # -> ###, ## -> ####, etc.
+                body = re.sub(r"^(#{1,5}) ", lambda m: "##" + m.group(1) + " ", body, flags=re.MULTILINE)
                 parts_md.append(body + "\n\n")
         else:
             # Explicit chapter list
@@ -123,7 +123,8 @@ date: "{config['date']}"
                     if date:
                         parts_md.append(f" --- {date}")
                     parts_md.append("*\n\n")
-                body = re.sub(r"^(#{2,5}) ", lambda m: "#" + m.group(1) + " ", body, flags=re.MULTILINE)
+                # Demote headings by 2 levels: # -> ###, ## -> ####, etc.
+                body = re.sub(r"^(#{1,5}) ", lambda m: "##" + m.group(1) + " ", body, flags=re.MULTILINE)
                 parts_md.append(body + "\n\n")
 
     book_md = "".join(parts_md)
