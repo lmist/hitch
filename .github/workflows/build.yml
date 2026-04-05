@@ -1,0 +1,96 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: install python deps
+        run: pip install pyyaml
+
+      - name: install texlive
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y texlive-luatex texlive-latex-extra texlive-fonts-recommended texlive-fonts-extra texlive-latex-recommended lmodern fonts-inconsolata
+
+      - name: install pandoc
+        run: |
+          wget -q https://github.com/jgm/pandoc/releases/download/3.6.4/pandoc-3.6.4-1-amd64.deb
+          sudo dpkg -i pandoc-3.6.4-1-amd64.deb
+
+      - name: install mintlify
+        run: bun install -g mint@latest
+
+      - name: preprocess + assemble
+        run: make preprocess
+
+      - name: build pdf (light)
+        run: make pdf
+
+      - name: build epub
+        run: make epub
+
+      - name: build mintlify site
+        run: make site
+
+      - name: verify
+        run: make verify
+
+      - name: build static site
+        run: |
+          cd site && mint build
+          # copy build artifacts into the static site
+          cp ../build/book-light.pdf .mintlify/output/book-light.pdf || true
+          cp ../build/book-dark.pdf .mintlify/output/book-dark.pdf || true
+          cp ../build/book.epub .mintlify/output/book.epub || true
+
+      - name: upload pages artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/.mintlify/output
+
+      - name: upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: book
+          path: |
+            build/book-light.pdf
+            build/book-dark.pdf
+            build/book.epub
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: deploy to github pages
+        id: deployment
+        uses: actions/deploy-pages@v4

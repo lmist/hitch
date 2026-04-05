@@ -1,4 +1,4 @@
-.PHONY: all preprocess pdf epub site verify clean dev
+.PHONY: all preprocess pdf epub site verify clean dev add
 
 all: preprocess pdf epub site verify
 
@@ -22,3 +22,7 @@ clean:
 
 dev: site
 	cd site && mint dev
+
+add:
+	@test -n "$(URL)" || (echo "usage: make add URL=https://..." && exit 1)
+	bun scripts/add-source.ts $(URL) $(AUTHOR)

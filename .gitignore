@@ -7,3 +7,4 @@ site/docs.json
 .env
 .playwright-mcp/
 prompt.md
+node_modules/

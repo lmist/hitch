@@ -1,126 +1,139 @@
 <p align="center">
-  <strong>H I T C H</strong>
+  <strong>h i t c h</strong>
 </p>
 
 <p align="center">
-  <em>A curated reader on agentic engineering &mdash; patterns, practices, and perspectives from the people building with AI coding agents.</em>
+  <em>the hitchhiker's guide to agentic engineering</em>
 </p>
 
 <p align="center">
-  PDF (light &amp; dark) &middot; ePub &middot; Markdown &middot; Mintlify site
+  <a href="https://github.com/lmist/hitch/actions/workflows/build.yml"><img src="https://github.com/lmist/hitch/actions/workflows/build.yml/badge.svg" alt="build"></a>
+</p>
+
+<p align="center">
+  pdf (light &amp; dark) · epub · markdown · mintlify site
 </p>
 
 ---
 
-## What is this?
+## what is this?
 
-Hitch is a multi-format book compiled from the best writing on agentic engineering. It pulls together guides, blog posts, courses, and community writing into a single, buildable collection that outputs:
+a curated multi-format book compiled from the best writing on agentic engineering. guides, blog posts, courses, and community writing — one buildable collection, five output formats.
 
-| Format | Use case |
+| format | use case |
 |--------|----------|
-| **PDF (light)** | Print-friendly, Palatino typeset, Memoir class |
-| **PDF (dark)** | Catppuccin Mocha theme for screen reading |
-| **ePub** | iBooks / Kindle / any e-reader |
-| **Markdown** | Feed into LLMs, import into Obsidian |
-| **Mintlify site** | Browsable web version |
+| **pdf (light)** | print-friendly, palatino typeset, memoir class |
+| **pdf (dark)** | catppuccin mocha theme for screen reading |
+| **epub** | ibooks / kindle / any e-reader |
+| **markdown** | feed into llms, import into obsidian |
+| **mintlify site** | browsable web version via github pages |
 
-One command rebuilds everything: `make all`
+one command rebuilds everything: `make all`
 
-## Contents
+## contents
 
-### Part I --- Agentic Engineering Patterns
-Simon Willison's comprehensive guide to working with coding agents like Claude Code and Codex. 15 chapters covering principles, workflows, testing, and annotated prompts.
+### part i — agentic engineering patterns
+simon willison's comprehensive guide to working with coding agents like claude code and codex. 15 chapters covering principles, workflows, testing, and annotated prompts.
 
-### Part II --- Blog Posts
-29 selected posts by Simon Willison spanning 2019--2026, from "The Perfect Commit" to "2025: The Year in LLMs." Chronologically ordered.
+### part ii — blog posts
+29 selected posts by simon willison spanning 2019–2026, from "the perfect commit" to "2025: the year in llms." chronologically ordered.
 
-### Part III --- Agent Skills
-Anthropic Academy's 6-lesson course on building, configuring, and sharing Skills in Claude Code.
+### part iii — agent skills
+anthropic academy's 6-lesson course on building, configuring, and sharing skills in claude code.
 
-### Part IV --- Other Voices
-Community perspectives, starting with @systematicls' "How To Be A World-Class Agentic Engineer."
+### part iv — other voices
+community perspectives, starting with @systematicls' "how to be a world-class agentic engineer."
 
-## Quick start
+## dependencies
+
+- [bun](https://bun.sh) — typescript runtime for the add-source script
+- [python 3](https://python.org) + [pyyaml](https://pypi.org/project/PyYAML/) — build pipeline
+- [pandoc](https://pandoc.org) — document conversion
+- [texlive](https://tug.org/texlive/) (lualatex) — pdf typesetting
+- [mintlify](https://mintlify.com) cli (optional) — web site preview
+
+## quick start
 
 ```bash
-# Prerequisites: pandoc, lualatex (TeX Live), python3, pyyaml
-# Optional: mint (Mintlify CLI) for the web version
-
-# Build everything
+# build everything
 make all
 
-# Or build individual formats
-make pdf        # light + dark PDFs
-make epub       # ePub for e-readers
-make site       # Mintlify site (then: make dev)
+# individual formats
+make pdf        # light + dark pdfs
+make epub       # epub for e-readers
+make site       # mintlify site
+make verify     # run checks
 
-# Add a new post by URL
-./scripts/add-source.sh https://simonwillison.net/2025/Mar/19/vibe-coding/
+# add a new post by url
+make add URL=https://simonwillison.net/2025/Mar/19/vibe-coding/
 
-# Preview the Mintlify site
+# or with a custom author directory
+make add URL=https://example.com/post AUTHOR=someperson
+
+# preview the mintlify site locally
 make dev
 ```
 
-## Project structure
+## project structure
 
 ```
 hitch/
-  sources/                  Raw crawled/captured markdown (the archive)
-    agentic-patterns/       Simon Willison's guide chapters
-    simonwillison/          Simon Willison's blog posts
-    anthropic-academy/      Anthropic Academy course lessons
+  sources/                  raw crawled/captured markdown
+    agentic-patterns/       simon willison's guide chapters
+    simonwillison/          simon willison's blog posts
+    anthropic-academy/      anthropic academy course lessons
     sysls/                  @systematicls' writing
   config/
-    book-order.yaml         Book structure and chapter ordering
+    book-order.yaml         book structure and chapter ordering
   templates/
-    book.tex                LaTeX book template (Memoir + Palatino)
-    light.tex / dark.tex    Color schemes
-    epub.css                ePub stylesheet
-    epub-metadata.yaml      ePub metadata
+    book.tex                latex book template (memoir + palatino)
+    light.tex / dark.tex    color schemes
+    epub.css                epub stylesheet
+    epub-metadata.yaml      epub metadata
   scripts/
-    build.py                Build orchestrator
-    preprocess.py           Strip boilerplate, extract metadata
-    verify.py               Post-build validation
-    add-source.sh           Add new content by URL
-  Makefile                  Build targets
+    build.py                build orchestrator
+    preprocess.py           strip boilerplate, extract metadata
+    verify.py               post-build validation
+    add-source.ts           add new content by url (bun)
+  .github/workflows/
+    build.yml               ci: build all formats + deploy to pages
+  Makefile                  build targets
 ```
 
-## How it works
+## how it works
 
-1. **Preprocess** --- Raw crawled markdown gets boilerplate stripped (site headers, footers, nav, sponsor text) and YAML frontmatter injected with title, author, date, and source URL.
-2. **Assemble** --- Cleaned chapters are concatenated in book order into a single `book.md` with part/chapter structure.
-3. **Build** --- Pandoc converts to PDF (via LuaLaTeX) and ePub. Mintlify site is generated from the cleaned files.
-4. **Verify** --- Automated checks for boilerplate leaks, missing frontmatter, valid outputs, and site integrity.
+1. **preprocess** — raw crawled markdown gets boilerplate stripped (site headers, footers, nav, sponsor text) and yaml frontmatter injected with title, author, date, and source url.
+2. **assemble** — cleaned chapters are concatenated in book order into a single `book.md` with part/chapter structure.
+3. **build** — pandoc converts to pdf (via lualatex) and epub. mintlify site is generated from the cleaned files.
+4. **verify** — automated checks for boilerplate leaks, missing frontmatter, valid outputs, and site integrity.
 
-## Adding content
-
-Drop a URL and rebuild:
+## adding content
 
 ```bash
-./scripts/add-source.sh <url> [author-dir]
+make add URL=https://simonwillison.net/2026/Apr/1/some-new-post/
 ```
 
-This uses the Cloudflare Browser Rendering API to crawl and convert the page to markdown, saves it to `sources/`, and triggers a full rebuild. Set `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` in `.env`.
+uses the cloudflare browser rendering api to crawl the page as markdown, saves it to `sources/`, and triggers a full rebuild. set `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` in `.env`.
 
-For authenticated pages (like Skilljar courses), capture content via Playwright and save directly to `sources/<author>/`.
+for authenticated pages (like skilljar courses), capture content via playwright and save directly to `sources/<author>/`.
 
-To add a new author or source type, create a directory under `sources/` and add an entry to `config/book-order.yaml`.
+to add a new author or source type, create a directory under `sources/` and add an entry to `config/book-order.yaml`.
 
 ---
 
-## Attribution
+## attribution
 
-This is a curated collection. All writing belongs to its respective authors.
+this is a curated collection. all writing belongs to its respective authors.
 
-**Simon Willison** --- [simonwillison.net](https://simonwillison.net)
-Creator of Datasette, contributor to Django, prolific writer on LLMs and developer tools. His *Agentic Engineering Patterns* guide and blog posts form the core of this collection. Licensed under his site's terms.
+**simon willison** — [simonwillison.net](https://simonwillison.net)
+creator of datasette, contributor to django, prolific writer on llms and developer tools. his *agentic engineering patterns* guide and blog posts form the core of this collection.
 
-**Anthropic** --- [anthropic.com](https://anthropic.com)
-The "Introduction to Agent Skills" course is published by Anthropic Academy on Skilljar. Content reproduced here for personal reference.
+**anthropic** — [anthropic.com](https://anthropic.com)
+the "introduction to agent skills" course is published by anthropic academy on skilljar.
 
-**@systematicls** --- [x.com/systematicls](https://x.com/systematicls)
-Author of "How To Be A World-Class Agentic Engineer," originally published as a thread on X.
+**@systematicls** — [x.com/systematicls](https://x.com/systematicls)
+author of "how to be a world-class agentic engineer," originally published as a thread on x.
 
-## License
+## license
 
-This repository contains the build tooling (scripts, templates, config) and curated source material. The build tooling is MIT licensed. The source content remains the intellectual property of its respective authors and is included here for personal educational use. If you are an author and would like your content removed, please open an issue.
+build tooling (scripts, templates, config) is mit licensed. source content remains the intellectual property of its respective authors and is included here for personal educational use. if you are an author and would like your content removed, please open an issue.
