@@ -11,6 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 BUILD = ROOT / "build"
 CLEAN = BUILD / "clean"
+SITE = ROOT / "site"
 
 BOILERPLATE = [
     "# [Simon Willison's Weblog",
@@ -115,19 +116,35 @@ def check_outputs():
 
 
 def check_site():
-    """Check static site output."""
-    print("\n--- static site ---")
+    """Check Mintlify site + static site output."""
+    print("\n--- mintlify site ---")
+    docs_json = SITE / "docs.json"
+    if not docs_json.exists():
+        warn("site/docs.json missing (site build may have been skipped)")
+    else:
+        import json as jsonlib
+        config = jsonlib.loads(docs_json.read_text())
+        tabs = config.get("navigation", {}).get("tabs", [])
+        page_refs = []
+        for tab in tabs:
+            for group in tab.get("groups", []):
+                page_refs.extend(group.get("pages", []))
+        missing = 0
+        for ref in page_refs:
+            if not (SITE / f"{ref}.mdx").exists():
+                error(f"docs.json references {ref} but {ref}.mdx missing")
+                missing += 1
+        print(f"  {len(page_refs)} pages referenced, {missing} missing")
+
+    print("\n--- static site (github pages) ---")
     index = BUILD / "site" / "index.html"
     if not index.exists():
-        warn("build/site/index.html missing (site build may have been skipped)")
-        return
-    size = index.stat().st_size / 1024
-    print(f"  index.html: {size:.0f}KB")
-    if size < 50:
-        error("index.html suspiciously small")
-    css = BUILD / "site" / "style.css"
-    if not css.exists():
-        warn("build/site/style.css missing")
+        warn("build/site/index.html missing")
+    else:
+        size = index.stat().st_size / 1024
+        print(f"  index.html: {size:.0f}KB")
+        if size < 50:
+            error("index.html suspiciously small")
 
 
 def main():

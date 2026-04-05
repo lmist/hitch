@@ -16,7 +16,7 @@ BUILD = ROOT / "build"
 CLEAN = BUILD / "clean"
 CONFIG = ROOT / "config"
 TEMPLATES = ROOT / "templates"
-SITE = BUILD / "site"
+SITE = ROOT / "site"
 
 
 def load_config():
@@ -185,8 +185,100 @@ def build_epub(book_md: Path):
 
 
 def build_site():
-    """Generate a static HTML site from book.md using pandoc."""
-    print("\n=== Building static site ===")
+    """Generate Mintlify site + static HTML fallback for GitHub Pages."""
+    build_mintlify_site()
+    build_static_site()
+
+
+def build_mintlify_site():
+    """Generate Mintlify MDX site (deployed by Mintlify from the repo)."""
+    print("\n=== Building Mintlify site ===")
+    config = load_config()
+
+    dir_map = {
+        "agentic-patterns": "guide",
+        "simonwillison": "blog",
+    }
+    default_site_dir = "voices"
+
+    for d in ["guide", "blog", "voices"]:
+        target = SITE / d
+        if target.exists():
+            shutil.rmtree(target)
+        target.mkdir(parents=True)
+
+    navigation_tabs = []
+    page_count = 0
+
+    for part in config["parts"]:
+        part_name = part["name"]
+        source_dir = part.get("source_dir", "")
+        site_subdir = dir_map.get(source_dir, default_site_dir)
+        groups = []
+
+        if part.get("order_by") == "date":
+            clean_dir = CLEAN / source_dir
+            if not clean_dir.exists():
+                continue
+            entries = []
+            for f in sorted(clean_dir.glob("*.md")):
+                meta, body = read_clean_file(f"{source_dir}/{f.stem}")
+                entries.append((meta, body, f.stem))
+            entries.sort(key=lambda e: e[0].get("published", "9999"))
+            pages = []
+            for meta, body, stem in entries:
+                write_mdx(SITE / site_subdir / f"{stem}.mdx", meta, body)
+                pages.append(f"{site_subdir}/{stem}")
+                page_count += 1
+            groups.append({"group": part.get("author", part_name), "pages": pages})
+        else:
+            chapters = part.get("chapters", [])
+            pages = []
+            for ch in chapters:
+                if isinstance(ch, dict):
+                    sd = ch.get("source_dir", source_dir)
+                    fname = ch["file"]
+                    sub = dir_map.get(sd, default_site_dir)
+                else:
+                    sd = source_dir
+                    fname = ch
+                    sub = site_subdir
+                meta, body = read_clean_file(f"{sd}/{fname}")
+                if body:
+                    write_mdx(SITE / sub / f"{fname}.mdx", meta, body)
+                    pages.append(f"{sub}/{fname}")
+                    page_count += 1
+            groups.append({"group": part_name, "pages": pages})
+
+        navigation_tabs.append({"tab": part_name, "groups": groups})
+
+    docs_config = {
+        "name": config["title"],
+        "theme": "quill",
+        "navigation": {"tabs": navigation_tabs},
+        "appearance": {"default": "light"},
+    }
+    docs_json = SITE / "docs.json"
+    docs_json.write_text(json.dumps(docs_config, indent=2))
+    print(f"  {page_count} MDX pages + docs.json -> site/")
+
+
+def write_mdx(path: Path, meta: dict, body: str):
+    """Write an MDX file with Mintlify-compatible frontmatter."""
+    title = meta.get("title", path.stem)
+    desc = re.sub(r"[*_\[\]()#>]", "", body[:200]).strip().split("\n")[0][:150]
+    fm = {"title": title, "description": desc}
+    if meta.get("author"):
+        fm["author"] = meta["author"]
+    if meta.get("published"):
+        fm["date"] = meta["published"]
+    frontmatter = yaml.dump(fm, default_flow_style=False, allow_unicode=True).strip()
+    path.write_text(f"---\n{frontmatter}\n---\n\n{body}\n")
+
+
+def build_static_site():
+    """Generate a static HTML site for GitHub Pages fallback."""
+    print("\n=== Building static site (github pages) ===")
     site_out = BUILD / "site"
     if site_out.exists():
         shutil.rmtree(site_out)
@@ -195,7 +287,6 @@ def build_site():
     book_md = BUILD / "book.md"
     index_html = site_out / "index.html"
 
-    # Build a self-contained HTML site with pandoc
     cmd = [
         "pandoc", str(book_md),
         "-o", str(index_html),
@@ -211,7 +302,6 @@ def build_site():
         print(f"  FAILED: {result.stderr[-500:]}")
         return False
 
-    # Copy the CSS
     css_src = TEMPLATES / "site.css"
     if css_src.exists():
         shutil.copy(css_src, site_out / "style.css")

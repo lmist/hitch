@@ -1,0 +1,38 @@
+---
+author: Simon Willison
+date: '2026-02-23'
+description: I’ve started a new project to collect and document Agentic Engineering
+  Patternshttps://simonwillison.net/guides/agentic-engineering-patterns/—coding p
+title: Writing about Agentic Engineering Patterns
+---
+
+I’ve started a new project to collect and document **[Agentic Engineering Patterns](https://simonwillison.net/guides/agentic-engineering-patterns/)**—coding practices and patterns to help get the best results out of this new era of coding agent development we find ourselves entering.
+
+I’m using **Agentic Engineering** to refer to building software using coding agents—tools like Claude Code and OpenAI Codex, where the defining feature is that they can both generate and _execute_ code—allowing them to test that code and iterate on it independently of turn-by-turn guidance from their human supervisor.
+
+I think of **vibe coding** using its [original definition](https://simonwillison.net/2025/Mar/19/vibe-coding/) of coding where you pay no attention to the code at all, which today is often associated with non-programmers using LLMs to write code.
+
+Agentic Engineering represents the other end of the scale: professional software engineers using coding agents to improve and accelerate their work by amplifying their existing expertise.
+
+There is so much to learn and explore about this new discipline! I’ve already published a lot [under my ai-assisted-programming tag](https://simonwillison.net/tags/ai-assisted-programming/) (345 posts and counting) but that’s been relatively unstructured. My new goal is to produce something that helps answer the question “how do I get good results out of this stuff” all in one place.
+
+I’ll be developing and growing this project here on my blog as a series of chapter-shaped patterns, loosely inspired by the format popularized by [Design Patterns: Elements of Reusable Object-Oriented Software](https://en.wikipedia.org/wiki/Design%5FPatterns) back in 1994.
+
+I published the first two chapters today:
+
+* **[Writing code is cheap now](https://simonwillison.net/guides/agentic-engineering-patterns/code-is-cheap/)** talks about the central challenge of agentic engineering: the cost to churn out initial working code has dropped to almost nothing, how does that impact our existing intuitions about how we work, both individually and as a team?
+* **[Red/green TDD](https://simonwillison.net/guides/agentic-engineering-patterns/red-green-tdd/)** describes how test-first development helps agents write more succinct and reliable code with minimal extra prompting.
+
+I hope to add more chapters at a rate of 1-2 a week. I don’t really know when I’ll stop, there’s a lot to cover!
+
+#### Written by me, not by an LLM
+
+I have a strong personal policy of not publishing AI-generated writing under my own name. That policy will hold true for Agentic Engineering Patterns as well. I’ll be using LLMs for proofreading and fleshing out example code and all manner of other side-tasks, but the words you read here will be my own.
+
+#### Chapters and Guides
+
+Agentic Engineering Patterns isn’t exactly _a book_, but it’s kind of book-shaped. I’ll be publishing it on my site using a new shape of content I’m calling a _guide_. A guide is a collection of chapters, where each chapter is effectively a blog post with a less prominent date that’s designed to be updated over time, not frozen at the point of first publication.
+
+Guides and chapters are my answer to the challenge of publishing “evergreen” content on a blog. I’ve been trying to find a way to do this for a while now. This feels like a format that might stick.
+
+If you’re interested in the implementation you can find the code in the [Guide](https://github.com/simonw/simonwillisonblog/blob/b9cd41a0ac4a232b2a6c90ca3fff9ae465263b02/blog/models.py#L262-L280), [Chapter](https://github.com/simonw/simonwillisonblog/blob/b9cd41a0ac4a232b2a6c90ca3fff9ae465263b02/blog/models.py#L349-L405) and [ChapterChange](https://github.com/simonw/simonwillisonblog/blob/b9cd41a0ac4a232b2a6c90ca3fff9ae465263b02/blog/models.py#L408-L423) models and the [associated Django views](https://github.com/simonw/simonwillisonblog/blob/b9cd41a0ac4a232b2a6c90ca3fff9ae465263b02/blog/views.py#L775-L923), almost all of which was written by Claude Opus 4.6 running in Claude Code for web accessed via my iPhone.

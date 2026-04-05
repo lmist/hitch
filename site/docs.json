@@ -1,0 +1,102 @@
+{
+  "name": "Agentic Engineering",
+  "theme": "quill",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Agentic Engineering Patterns",
+        "groups": [
+          {
+            "group": "Agentic Engineering Patterns",
+            "pages": [
+              "guide/what-is-agentic-engineering",
+              "guide/code-is-cheap",
+              "guide/hoard-things-you-know-how-to-do",
+              "guide/better-code",
+              "guide/anti-patterns",
+              "guide/how-coding-agents-work",
+              "guide/using-git-with-coding-agents",
+              "guide/subagents",
+              "guide/red-green-tdd",
+              "guide/first-run-the-tests",
+              "guide/agentic-manual-testing",
+              "guide/linear-walkthroughs",
+              "guide/interactive-explanations",
+              "guide/gif-optimization",
+              "guide/prompts"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Blog Posts",
+        "groups": [
+          {
+            "group": "Simon Willison",
+            "pages": [
+              "blog/niche-museums-kepler",
+              "blog/better-presentations",
+              "blog/the-perfect-commit",
+              "blog/annotated-presentations",
+              "blog/ai-in-2023",
+              "blog/claude-and-chatgpt-case-study",
+              "blog/building-c-extensions-for-sqlite-with-chatgpt-code-interpreter",
+              "blog/ocr-pdfs-images",
+              "blog/slop",
+              "blog/michael-wooldridge",
+              "blog/llms-in-2024",
+              "blog/a-computer-can-never-be-held-accountable",
+              "blog/vibe-coding",
+              "blog/gemini-image-segmentation",
+              "blog/six-months-in-llms",
+              "blog/the-lethal-trifecta",
+              "blog/vibe-scraping",
+              "blog/sloccount-in-webassembly",
+              "blog/claude-code-for-web-video",
+              "blog/github-universe-badge",
+              "blog/async-code-research",
+              "blog/html-tools",
+              "blog/code-proven-to-work",
+              "blog/the-year-in-llms",
+              "blog/inflection",
+              "blog/kakapo-mug",
+              "blog/gemini-31-pro",
+              "blog/agentic-engineering-patterns",
+              "blog/present"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Agent Skills",
+        "groups": [
+          {
+            "group": "Agent Skills",
+            "pages": [
+              "voices/01-what-are-skills",
+              "voices/02-creating-your-first-skill",
+              "voices/03-configuration-and-multi-file-skills",
+              "voices/04-skills-vs-other-features",
+              "voices/05-sharing-skills",
+              "voices/06-troubleshooting-skills"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Other Voices",
+        "groups": [
+          {
+            "group": "Other Voices",
+            "pages": [
+              "voices/sysls-how-to-become-worldclass-agentic-engineer"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "appearance": {
+    "default": "light"
+  }
+}

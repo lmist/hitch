@@ -26,7 +26,8 @@ a curated multi-format book compiled from the best writing on agentic engineerin
 | **pdf (dark)** | catppuccin mocha theme for screen reading |
 | **epub** | ibooks / kindle / any e-reader |
 | **markdown** | feed into llms, import into obsidian |
-| **static site** | browsable web version via github pages |
+| **mintlify site** | browsable docs site (deployed by mintlify from the repo) |
+| **static site** | github pages fallback |
 
 one command rebuilds everything: `make all`
 
@@ -61,7 +62,7 @@ make all
 # individual formats
 make pdf        # light + dark pdfs
 make epub       # epub for e-readers
-make site       # static html site
+make site       # mintlify site + static html
 make verify     # run checks
 
 # add a new post by url
@@ -104,7 +105,7 @@ hitch/
 
 1. **preprocess** — raw crawled markdown gets boilerplate stripped (site headers, footers, nav, sponsor text) and yaml frontmatter injected with title, author, date, and source url.
 2. **assemble** — cleaned chapters are concatenated in book order into a single `book.md` with part/chapter structure.
-3. **build** — pandoc converts to pdf (via lualatex), epub, and a static html site with sidebar nav and dark mode support.
+3. **build** — pandoc converts to pdf (via lualatex) and epub. mintlify site is generated as mdx files (mintlify deploys from the repo). static html fallback for github pages.
 4. **verify** — automated checks for boilerplate leaks, missing frontmatter, valid outputs, and site integrity.
 
 ## adding content
