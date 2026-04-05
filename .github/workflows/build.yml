@@ -21,10 +21,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -42,37 +38,20 @@ jobs:
           wget -q https://github.com/jgm/pandoc/releases/download/3.6.4/pandoc-3.6.4-1-amd64.deb
           sudo dpkg -i pandoc-3.6.4-1-amd64.deb
 
-      - name: install mintlify
-        run: bun install -g mint@latest
+      - name: build all
+        run: make all
 
-      - name: preprocess + assemble
-        run: make preprocess
-
-      - name: build pdf (light)
-        run: make pdf
-
-      - name: build epub
-        run: make epub
-
-      - name: build mintlify site
-        run: make site
-
-      - name: verify
-        run: make verify
-
-      - name: build static site
+      - name: copy artifacts into site
         run: |
-          cd site && mint build
-          # copy build artifacts into the static site
-          cp ../build/book-light.pdf .mintlify/output/book-light.pdf || true
-          cp ../build/book-dark.pdf .mintlify/output/book-dark.pdf || true
-          cp ../build/book.epub .mintlify/output/book.epub || true
+          cp build/book-light.pdf build/site/book-light.pdf || true
+          cp build/book-dark.pdf build/site/book-dark.pdf || true
+          cp build/book.epub build/site/book.epub || true
 
       - name: upload pages artifact
         if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
-          path: site/.mintlify/output
+          path: build/site
 
       - name: upload build artifacts
         uses: actions/upload-artifact@v4

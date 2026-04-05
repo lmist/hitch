@@ -26,7 +26,7 @@ a curated multi-format book compiled from the best writing on agentic engineerin
 | **pdf (dark)** | catppuccin mocha theme for screen reading |
 | **epub** | ibooks / kindle / any e-reader |
 | **markdown** | feed into llms, import into obsidian |
-| **mintlify site** | browsable web version via github pages |
+| **static site** | browsable web version via github pages |
 
 one command rebuilds everything: `make all`
 
@@ -61,7 +61,7 @@ make all
 # individual formats
 make pdf        # light + dark pdfs
 make epub       # epub for e-readers
-make site       # mintlify site
+make site       # static html site
 make verify     # run checks
 
 # add a new post by url
@@ -70,7 +70,7 @@ make add URL=https://simonwillison.net/2025/Mar/19/vibe-coding/
 # or with a custom author directory
 make add URL=https://example.com/post AUTHOR=someperson
 
-# preview the mintlify site locally
+# preview the site locally
 make dev
 ```
 
@@ -96,15 +96,15 @@ hitch/
     verify.py               post-build validation
     add-source.ts           add new content by url (bun)
   .github/workflows/
-    build.yml               ci: build all formats + deploy to pages
-  Makefile                  build targets
+    build.yml               ci: build all formats, deploy to pages
+  Makefile                  build targets (we old school)
 ```
 
 ## how it works
 
 1. **preprocess** — raw crawled markdown gets boilerplate stripped (site headers, footers, nav, sponsor text) and yaml frontmatter injected with title, author, date, and source url.
 2. **assemble** — cleaned chapters are concatenated in book order into a single `book.md` with part/chapter structure.
-3. **build** — pandoc converts to pdf (via lualatex) and epub. mintlify site is generated from the cleaned files.
+3. **build** — pandoc converts to pdf (via lualatex), epub, and a static html site with sidebar nav and dark mode support.
 4. **verify** — automated checks for boilerplate leaks, missing frontmatter, valid outputs, and site integrity.
 
 ## adding content
