@@ -44,11 +44,12 @@
 \usepackage{fancyvrb}
 \usepackage{framed}
 \definecolor{shadecolor}{named}{codebg}
-\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
-
 $if(highlighting-macros)$
 $highlighting-macros$
 $endif$
+
+% Override Shaded after highlighting-macros to use our themed background
+\renewenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
 
 % ---- Graphics ----
 \usepackage{graphicx}

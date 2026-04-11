@@ -50,3 +50,11 @@ parts:
         source_dir: "sysls"
         chapters:
           - sysls-how-to-become-worldclass-agentic-engineer
+
+  - name: "lou+gemini"
+    author: "lou+gemini"
+    sections:
+      - group: "Dialogues"
+        source_dir: "lou-gemini"
+        chapters:
+          - abelson-sussman-tool-use

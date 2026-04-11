@@ -1,0 +1,1465 @@
+---
+author: lou+gemini
+date: '2026-04-11'
+description: explain this to me as if you were harold abelson and gerald sussman
+title: Tool Use, As Explained by Abelson & Sussman
+---
+
+>
+> explain this to me as if you were harold abelson and gerald sussman
+>
+>
+> ```typescript
+> /**
+> * Single tool, single turn example.
+> * Run with: bun run tool.ts or npx tsx tool.ts
+> */
+>
+>
+> const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://localhost:11434';
+> const MODEL = 'functiongemma';
+>
+>
+> function getWeather(city: string): string {
+> return JSON.stringify({ city, temperature: 22, unit: 'celsius', condition: 'sunny' });
+> }
+>
+>
+> const tools = [
+> {
+> type: 'function',
+> function: {
+> name: 'get_weather',
+> description: 'Get the current weather for a city.',
+> parameters: {
+> type: 'object',
+> properties: {
+> city: { type: 'string', description: 'The name of the city' },
+> },
+> required: ['city'],
+> },
+> },
+> },
+> ];
+>
+>
+> interface Message {
+> role: string;
+> content: string;
+> tool_calls?: { function: { name: string; arguments: Record<string, string> } }[];
+> }
+>
+>
+> interface ChatResponse {
+> message: Message;
+> }
+>
+>
+> async function chat(messages: Message[]): Promise<ChatResponse> {
+> const response = await fetch(`${OLLAMA_HOST}/api/chat`, {
+> method: 'POST',
+> headers: { 'Content-Type': 'application/json' },
+> body: JSON.stringify({ model: MODEL, messages, tools, stream: false }),
+> });
+>
+>
+> if (!response.ok) {
+> throw new Error(`HTTP error: ${response.status} ${await response.text()}`);
+> }
+>
+>
+> return response.json();
+> }
+>
+>
+> async function main() {
+> const messages: Message[] = [{ role: 'user', content: 'What is the weather in Paris?' }];
+> console.log('Prompt:', messages[0].content);
+>
+>
+> const response = await chat(messages);
+>
+>
+> if (response.message.tool_calls?.length) {
+> const tool = response.message.tool_calls[0];
+> console.log(`Calling: ${tool.function.name}(${JSON.stringify(tool.function.arguments)})\n`);
+>
+>
+> const result = getWeather(tool.function.arguments.city);
+> console.log('Function Result:', result);
+>
+>
+> messages.push(response.message);
+> messages.push({ role: 'tool', content: result });
+>
+>
+> const final = await chat(messages);
+> console.log('Response:', final.message.content);
+> } else {
+> console.log('Response:', response.message.content);
+> }
+> }
+>
+>
+> main().catch(console.error);
+> ```
+
+(The lecture hall quiets down. On the chalkboard, a diagram of a feedback loop is already drawn. Hal Abelson adjusts his glasses, while Gerry Sussman leans against the desk, holding a piece of chalk.)
+
+Hal Abelson: "What we are looking at here, in this specific artifact of TypeScript, is not merely a script for fetching weather. It is something far more fundamental. We are looking at the construction of a computational process that integrates a stochastic element—the Large Language Model—with a deterministic procedure."
+
+Gerry Sussman: "That's right, Hal. And remember, the essence of computer science is not about syntax. It is not about const or async or where you put your curly braces. It is about controlling complexity through abstraction.
+
+Let us decompose this program to understand the spirits we are conjuring here."
+
+1. The Primitive Abstraction
+
+Hal: "First, look at this procedure here, getWeather.
+
+```typescript
+function getWeather(city: string): string {
+  return JSON.stringify({ ... });
+}
+```
+
+In the grand scheme, this is what we call a primitive. To the rest of our system, it is a black box. We do not care how it determines the weather. It could be looking at a thermometer, or it could be—as it is here—simply returning a constant truth.
+
+The abstraction barrier is clear: You give it a city, and it returns a string representation of a state. It is a deterministic mapping: f(city)→weather."
+
+2. Metalinguistic Abstraction (Data as Code)
+
+Gerry: "But here is the beautiful part. The Language Model does not know about this function. We must teach it. We must describe the shape of our tool.
+
+Look at the tools array.
+
+```typescript
+const tools = [
+  {
+    type: 'function',
+    function: { name: 'get_weather', ... }
+  },
+];
+```
+
+This is data describing a procedure. In Lisp, we often say that code is data and data is code. Here, we are reifying the concept of the function into a JSON structure so that the model can reason about the function without actually executing it yet. We are giving the model a menu of capabilities."
+
+Hal: "Exactly. We are engaging in wishful thinking. We are telling the model: 'Assume you have a procedure called get_weather. If you were to use it, here is what the arguments would look like.'"
+
+3. The Evaluator (The chat Procedure)
+
+Hal: "Now we come to the chat function. This serves as our evaluator.
+
+It takes the state of the world (the messages history) and the available capabilities (tools), and it sends them to the oracle (Ollama).
+
+Notice the signature:
+
+Chat:(State,Tools)→Decision
+
+The response isn't just text anymore. It is a decision. The model effectively decides: 'Do I have enough information to answer? Or must I defer to a tool?'"
+
+4. The Read-Eval-Print Loop (The main Process)
+
+Gerry: "This is where the magic happens. The main function is implementing a control loop, very similar to the standard eval-apply cycle we teach in 6.001.
+
+Let's trace the process evolution:
+
+The Query: We push 'What is the weather in Paris?' onto the stack.
+
+The Evaluation: We call chat. The model analyzes the semantics. It realizes, 'I am a language model; I do not know the weather. But! I have a tool description that does.'
+
+The Deferred Operation: The model returns a tool_calls object. It says, 'I wish to call get_weather with argument Paris.'
+
+Hal: "Note carefully: The model did not call the function. It emitted the intent to call the function. It is up to our main procedure to perform the application."
+
+```typescript
+if (response.message.tool_calls?.length) {
+    // ... identifying the tool ...
+    const result = getWeather(tool.function.arguments.city); // THE APPLY STEP
+    // ...
+}
+```
+
+Gerry: "This is the Apply step. We take the intent, we execute the deterministic primitive getWeather, and we capture the result."
+
+5. Closing the Loop
+
+Hal: "Finally, we must complete the circle. We cannot simply leave the result hanging. We must feed the result of the tool back into the history."
+
+```typescript
+messages.push({ role: 'tool', content: result });
+const final = await chat(messages);
+```
+
+Hal: "We invoke the oracle a second time. Now, the state has changed.
+
+State 1: User asks about Paris.
+
+State 2: Assistant asks to run tool.
+
+State 3: Tool returns {temp: 22}.
+
+The model sees this history, integrates the tool's output into its linguistic context, and produces the final natural language response: 'The weather in Paris is 22 degrees Celsius.'"
+
+Summary
+
+Gerry: "So, what have we actually built?"
+
+Hal: "We have built a system where a probabilistic engine (the LLM) directs the control flow of deterministic code. It is a recursive process of semantic refinement."
+
+Gerry: "We are effectively using the Large Language Model as a general-purpose planner. It figures out what to do, and our TypeScript code figures out how to do it.
+
+And that, my friends, is the power of combining symbolic processing with statistical inference."
+
+A Next Step for You
+
+Hal: "To truly understand this, you must see what happens when the abstraction leaks.
+
+Would you like me to modify this code to handle a 'tool error' (e.g., if the city is unknown), so we can see how the model reacts when the deterministic world fails to meet its expectations?"
+
+---
+
+> surely
+
+(Gerry Sussman rubs his chin, looking at the previous code on the board.)
+
+Gerry Sussman: "Excellent choice. You see, a system that cannot handle failure is a fragile system. In the real world—unlike in the ideal mathematical plane—procedures fail. Networks timeout. Data is missing.
+
+If our getWeather primitive encounters a city that does not exist, like 'Atlantis', it should not crash the universe. It should signal a condition."
+
+Hal Abelson: "Precisely, Gerry. We must treat Errors as Values.
+
+When the execution of our primitive fails, that failure is not the end of the computation. It is simply a new piece of information: 'I attempted X, and the result was an Error.'
+
+We must feed this error back into the Language Model. Why? So the model can adapt its plan."
+
+The Robust Implementation
+
+Here is how we modify the system. We introduce a conditional check in our primitive, and we wrap our application step in a try-catch block to reify the exception into a message.
+
+```typescript
+/**
+ * Single tool with Error Handling.
+ * We treat exceptions as valid information for the planner.
+ */
+
+const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://localhost:11434';
+const MODEL = 'functiongemma';
+
+// 1. A Fallible Primitive
+// We introduce a 'condition' where the procedure fails.
+function getWeather(city: string): string {
+  if (city.toLowerCase() === 'atlantis') {
+    throw new Error(`City '${city}' not found in database.`);
+  }
+  return JSON.stringify({ city, temperature: 22, unit: 'celsius', condition: 'sunny' });
+}
+
+// ... (Tools definition and Chat interface remain the same) ...
+
+const tools = [
+  {
+    type: 'function',
+    function: {
+      name: 'get_weather',
+      description: 'Get the current weather for a city.',
+      parameters: {
+        type: 'object',
+        properties: {
+          city: { type: 'string', description: 'The name of the city' },
+        },
+        required: ['city'],
+      },
+    },
+  },
+];
+
+interface Message {
+  role: string;
+  content: string;
+  tool_calls?: { function: { name: string; arguments: Record<string, string> } }[];
+}
+
+interface ChatResponse {
+  message: Message;
+}
+
+async function chat(messages: Message[]): Promise<ChatResponse> {
+  const response = await fetch(`${OLLAMA_HOST}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: MODEL, messages, tools, stream: false }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error: ${response.status} ${await response.text()}`);
+  }
+
+  return response.json();
+}
+
+async function main() {
+  // 2. The Wishful Query
+  // We intentionally ask for a case that will fail.
+  const messages: Message[] = [{ role: 'user', content: 'What is the weather in Atlantis?' }];
+  console.log('Prompt:', messages[0].content);
+
+  const response = await chat(messages);
+
+  if (response.message.tool_calls?.length) {
+    const tool = response.message.tool_calls[0];
+    console.log(`Calling: ${tool.function.name}(${JSON.stringify(tool.function.arguments)})\n`);
+
+    let result: string;
+    
+    // 3. The Protected Apply
+    // We attempt to apply the function. If it fails, we catch the exception
+    // and convert it into a string that the LLM can understand.
+    try {
+      result = getWeather(tool.function.arguments.city);
+      console.log('Function Result (Success):', result);
+    } catch (error: any) {
+      console.log('Function Result (Error):', error.message);
+      // We format the error as a JSON object for the model
+      result = JSON.stringify({ error: error.message });
+    }
+
+    messages.push(response.message);
+    
+    // 4. Closing the Loop with Failure
+    // We send the ERROR back to the model as if it were a valid tool output.
+    messages.push({ role: 'tool', content: result });
+
+    const final = await chat(messages);
+    console.log('Response:', final.message.content);
+  } else {
+    console.log('Response:', response.message.content);
+  }
+}
+
+main().catch(console.error);
+```
+
+The Analysis
+
+Hal: "Do you see what happened in the main procedure?
+
+```typescript
+try {
+  result = getWeather(...)
+} catch (error) {
+  result = JSON.stringify({ error: error.message });
+}
+```
+
+We trapped the explosion. We converted the program-crashing semantics of an Error object into the linguistic semantics of a JSON string."
+
+Gerry: "And look at the result. When you run this, the model will receive:
+{ "error": "City 'Atlantis' not found in database." }
+
+It will then process this new state. It will not try to parse a temperature that isn't there. Instead, its internal probability distribution will shift towards an apology or a correction.
+
+It will likely say: 'I am sorry, but I cannot find weather information for Atlantis.'"
+
+Hal: "This is the essence of Cybernetics—control and communication in the animal and the machine. The error signal corrects the controller."
+
+A Next Step
+
+Gerry: "Now, we have a loop that works for one turn, success or failure. But a conversation is a stream of interactions, potentially infinite.
+
+Would you like us to wrap this logic into a recursive 'REPL' (Read-Eval-Print Loop) so you can have a continuous back-and-forth conversation with the model, maintaining memory of previous turns?"
+
+---
+
+> thank you sir, although that would be an interesting path; i'm more interested in exploring the following:
+>
+>
+> the above is toy example of something we'll likely never really do with an LLM - or maybe so.
+> typically, i would use a weather api and call a function to get it for me, maybe i'd add an llm that calls a tool if im using voice?
+>
+>
+> what's a case where this becomes more realistic?
+> and after that, let's make a bit more complicated perhaps, closer and closer to a real world application; but gently.
+
+(Hal nods enthusiastically, chalk dust settling on his blazer.)
+
+Hal Abelson: "You have hit upon the central truth of engineering systems. We do not build complex machinery to perform trivial tasks. Using a Large Language Model to fetch the weather for 'Paris' is like using a warp drive to cross the street. It works, but the energy expenditure is absurd compared to the utility."
+
+Gerry Sussman: "Right. If you know exactly what you want—'Get me the weather in Paris'—you write a script. You use a deterministic procedure.
+
+The 'Realistic' case emerges when there is an impedance mismatch between the User and the Machine.
+
+The User speaks in ambiguity, intent, and messy unstructured prose.
+
+The Machine (your API) demands strict schemas, specific IDs, and enumerated types.
+
+The LLM is not the 'brain' here; it is the Transducer. It converts the fuzzy signal of human language into the crisp signal of a function call."
+
+The Realistic Scenario: The "Triage" Agent
+
+Hal: "Let us look at a Customer Support Triage system. This is a problem every company has.
+
+The Input: An angry email. It contains a mix of emotional venting, relevant facts, and irrelevant noise.
+
+The Goal: We cannot just 'reply'. We must take action. We must categorize the issue and extract specific entities (like an Order ID) to call our backend."
+
+Gerry: "Notice the difference. We are not just looking up a value. We are asking the model to perform Semantic Analysis and Parameter Extraction simultaneously. A regular expression cannot easily tell the difference between 'I want to buy Order 500' and 'I hate Order 500'."
+
+```typescript
+/**
+ * Realistic Scenario: Customer Support Triage
+ * The model must:
+ * 1. Read a messy user complaint.
+ * 2. Decide if it warrants a refund or just a status check.
+ * 3. Extract the Order ID hidden in the text.
+ * 4. Generate a formal reason for the API.
+ */
+
+const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://localhost:11434';
+const MODEL = 'functiongemma';
+
+// --- The Deterministic "Backend" ---
+
+// Tool 1: High sensitivity action
+function processRefund(orderId: string, reason: string): string {
+  console.log(`[BANKING SYSTEM] Processing refund for Order #${orderId}. Reason: ${reason}`);
+  return JSON.stringify({ status: 'success', refund_id: 'REF-999', amount_refunded: 50.00 });
+}
+
+// Tool 2: Low sensitivity action
+function trackOrder(orderId: string): string {
+  console.log(`[LOGISTICS SYSTEM] Tracking Order #${orderId}`);
+  return JSON.stringify({ status: 'in_transit', location: 'Distribution Center', eta: '2 days' });
+}
+
+// --- The Tool Definitions (The API Schema) ---
+
+const tools = [
+  {
+    type: 'function',
+    function: {
+      name: 'process_refund',
+      description: 'Refund a customer order. Use this ONLY if the customer explicitly mentions damage or requests money back.',
+      parameters: {
+        type: 'object',
+        properties: {
+          orderId: { type: 'string', description: 'The alphanumeric order ID (e.g., ORD-123)' },
+          reason: { type: 'string', description: 'A concise technical reason for the refund based on the user complaint' },
+        },
+        required: ['orderId', 'reason'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'track_order',
+      description: 'Check the status of a package. Use this for general inquiries about delivery time.',
+      parameters: {
+        type: 'object',
+        properties: {
+          orderId: { type: 'string', description: 'The order ID' },
+        },
+        required: ['orderId'],
+      },
+    },
+  },
+];
+
+// ... (Chat and Interface definitions remain standard) ...
+
+// --- The Helper to Execute Tools Dynamically ---
+// This is a simple dispatcher pattern.
+async function executeToolCall(toolCall: any) {
+  const fnName = toolCall.function.name;
+  const args = toolCall.function.arguments;
+
+  if (fnName === 'process_refund') {
+    return processRefund(args.orderId, args.reason);
+  } else if (fnName === 'track_order') {
+    return trackOrder(args.orderId);
+  } else {
+    throw new Error(`Unknown tool: ${fnName}`);
+  }
+}
+
+// --- Main Process ---
+
+async function chat(messages: any[]): Promise<any> {
+    const response = await fetch(`${OLLAMA_HOST}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: MODEL, messages, tools, stream: false }),
+    });
+    return response.json();
+}
+
+async function main() {
+  // A MESSY, Realistic Input
+  // Notice: The user does not say "Call process_refund". They express a situation.
+  const userText = "I am absolutely furious! My package (ORD-8821) arrived completely crushed. The box is wet and the item is broken. I want my money back immediately!";
+  
+  const messages = [{ role: 'user', content: userText }];
+  console.log(`User Complaint: "${userText}"\n`);
+
+  const response = await chat(messages);
+
+  if (response.message.tool_calls?.length) {
+    const tool = response.message.tool_calls[0];
+    
+    // HAL: "Observe! The model inferred 'process_refund' from 'crushed' and 'money back'."
+    // GERRY: "And look, it extracted 'ORD-8821' from the sentence."
+    console.log(`> LLM Decision: Call ${tool.function.name}`);
+    console.log(`> Arguments Extracted:`, tool.function.arguments);
+
+    // Execute
+    const result = await executeToolCall(tool);
+    
+    // Feed back
+    messages.push(response.message);
+    messages.push({ role: 'tool', content: result });
+
+    // Final Natural Language Response
+    const final = await chat(messages);
+    console.log(`\nAgent Response: "${final.message.content}"`);
+  }
+}
+
+main().catch(console.error);
+```
+
+The Analysis
+
+Hal: "Look at what we achieved here. The function processRefund is strict. It takes orderId and reason.
+
+If you tried to write a standard program to parse that user string, think of the if statements you would need:
+
+if (text.contains("money back") || text.contains("refund") || text.contains("broken")) ...
+
+Then a regex to find something that looks like an Order ID...
+
+It is brittle. If the user had said, 'The item is defective, credit my account,' your keyword search for 'refund' might fail."
+
+Gerry: "But the model captures the semantics. It maps the concept of a broken item to the tool for refunds. That is the realistic application: Converting Unstructured intent into Structured Action."
+
+Phase 2: "Gently" More Complicated (Multi-Step Logic)
+
+Gerry: "Now, you asked to make it 'gently' more complicated.
+
+In the real world, you rarely have all the information in one shot. If I say 'Book me a meeting with the VP,' you cannot call book_meeting yet. You don't know which VP, and you don't know when.
+
+This leads us to The Agentic Loop (or Chain of Thought).
+
+Instead of Input -> Tool -> Response, the pattern becomes:
+Input -> Tool 1 -> Observation -> Tool 2 -> Observation -> Response."
+
+Hal: "Let us imagine a scenario where the output of one tool is the input for the next. This is Function Chaining."
+
+User: "Refund the last order I made."
+
+Problem: We don't have the Order ID.
+
+Step 1: Call get_last_order(userId) -> Returns ORD-555.
+
+Step 2: Call refund_order(ORD-555).
+
+Would you like to see how we implement this 'Chaining' loop, where the model automatically calls a tool, reads the result, and realizes it needs to call another tool before answering?
+
+---
+
+> yes
+
+(Gerry Sussman walks over to the blackboard and erases the simple linear diagram. He draws a circle with arrows feeding back into itself.)
+
+Gerry Sussman: "We are now leaving the realm of simple 'stimulus-response' and entering the realm of Cybernetic Feedback Loops.
+
+In our previous example, the path was linear: User -> Model -> Tool -> Answer.
+
+But what if the User says: 'Refund my last order'?
+
+The semantic intent is clear, but the parameters are missing. The refund procedure requires an orderId. The model cannot hallucinate this ID; it must discover it. It must realize: 'I do not know the ID. I must look it up first.'"
+
+Hal Abelson: "This is where we implement a general-purpose Agent Loop. We do not hard-code 'call tool, then answer.' We say: 'Keep calling tools until you are satisfied that you have the answer.'
+
+We are building a machine that thinks in steps."
+
+The Chained Execution Agent
+
+Here is a system that can handle dependencies between tools.
+
+Tool A (list_orders): Gets the context (the history).
+
+Tool B (refund_order): Acts on the data retrieved by Tool A.
+
+```typescript
+/**
+ * Multi-Step "Agentic" Loop
+ * * Scenario: User says "Refund my last order".
+ * The model must:
+ * 1. Realize it needs an Order ID.
+ * 2. Call `get_recent_orders` to find it.
+ * 3. Observe the list, pick the last one.
+ * 4. Call `process_refund` with that specific ID.
+ * 5. Report back.
+ */
+
+const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://localhost:11434';
+const MODEL = 'functiongemma';
+
+// --- The "Database" (State) ---
+const DB = {
+  orders: [
+    { id: 'ORD-101', item: 'T-Shirt', price: 20, status: 'delivered' },
+    { id: 'ORD-102', item: 'Ceramic Mug', price: 15, status: 'delivered' },
+  ]
+};
+
+// --- The Primitives ---
+
+function getRecentOrders(userId: string): string {
+  // In reality, userId would come from session context
+  console.log(`[DB] Fetching orders for user: ${userId}...`);
+  return JSON.stringify(DB.orders);
+}
+
+function processRefund(orderId: string, reason: string): string {
+  console.log(`[BANK] Processing refund for ${orderId}. Reason: ${reason}`);
+  return JSON.stringify({ status: 'success', refund_id: 'REF-9000', message: 'Refund processed.' });
+}
+
+// --- The Tool Definitions ---
+
+const tools = [
+  {
+    type: 'function',
+    function: {
+      name: 'get_recent_orders',
+      description: 'Get a list of recent orders for the current user. Returns JSON with order IDs and items.',
+      parameters: {
+        type: 'object',
+        properties: {
+          userId: { type: 'string', description: 'The user identifier (default to "current_user")' },
+        },
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'process_refund',
+      description: 'Refund a specific order. Requires the exact Order ID.',
+      parameters: {
+        type: 'object',
+        properties: {
+          orderId: { type: 'string', description: 'The alphanumeric order ID' },
+          reason: { type: 'string', description: 'Why the refund is happening' },
+        },
+        required: ['orderId', 'reason'],
+      },
+    },
+  },
+];
+
+// --- The Dispatcher ---
+
+async function executeTool(name: string, args: any) {
+  if (name === 'get_recent_orders') return getRecentOrders(args.userId || 'current_user');
+  if (name === 'process_refund') return processRefund(args.orderId, args.reason);
+  throw new Error(`Unknown tool: ${name}`);
+}
+
+// --- The Recursive Evaluator (The Brain) ---
+
+async function runAgent(messages: any[]) {
+  // 1. Ask the Oracle
+  const response = await fetch(`${OLLAMA_HOST}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: MODEL, messages, tools, stream: false }),
+  });
+  
+  const data = await response.json();
+  const message = data.message;
+
+  // 2. Check Termination Condition
+  // If the model did NOT ask for a tool, we are done. Return the text.
+  if (!message.tool_calls || message.tool_calls.length === 0) {
+    console.log(`\n[AGENT] Final Answer: "${message.content}"`);
+    return message.content;
+  }
+
+  // 3. The Recursive Step
+  // The model wants to run a tool. We must run it, update history, and RECURSE.
+  console.log(`\n[AGENT] Reasoning... requires tool: ${message.tool_calls[0].function.name}`);
+  
+  // Append the model's "intent" to the history
+  messages.push(message);
+
+  // Execute all requested tools (sometimes it requests multiple parallel calls!)
+  for (const tool of message.tool_calls) {
+    const fnName = tool.function.name;
+    const fnArgs = tool.function.arguments;
+    
+    console.log(`[EXEC] Running ${fnName} with args:`, fnArgs);
+    const result = await executeTool(fnName, fnArgs);
+    console.log(`[DATA] Result: ${result}`);
+
+    // Append the "result" to the history
+    messages.push({ role: 'tool', content: result, name: fnName });
+  }
+
+  // 4. Loop! 
+  // We call runAgent again with the NEW history.
+  return runAgent(messages);
+}
+
+async function main() {
+  const userPrompt = "I want a refund for the mug I bought recently. It arrived broken.";
+  console.log(`Prompt: "${userPrompt}"`);
+
+  const messages = [{ role: 'user', content: userPrompt }];
+  
+  await runAgent(messages);
+}
+
+main().catch(console.error);
+```
+
+The Trace: Walking Through the Logic
+
+Hal: "If you run this code, observe the console carefully. It tells a story of discovery."
+
+Turn 1: The model reads "Refund the mug". It looks at its tools. It sees process_refund, but that needs an ID. It sees get_recent_orders. It decides: "I must find the mug first."
+
+Action: Calls get_recent_orders.
+
+Turn 2: The tool returns: [{id: 'ORD-101', item: 'T-Shirt'}, {id: 'ORD-102', item: 'Ceramic Mug'}].
+
+The model reads this JSON. It matches "Mug" from the user prompt to "Ceramic Mug" in the data.
+
+It extracts ORD-102.
+
+Turn 3: The model now has the ID. It forms a new plan.
+
+Action: Calls process_refund(orderId: 'ORD-102', reason: 'broken').
+
+Turn 4: The tool returns success. The model sees it is done.
+
+Final Output: "I have processed the refund for your Ceramic Mug (Order ORD-102)."
+
+Gerry: "This is powerful because we did not write code to 'search for mugs'. We simply exposed the data, and the model performed the relational join between the user's intent ('the mug') and our database records ('ORD-102') purely through semantic reasoning."
+
+A Next Step
+
+Hal: "We have now built a functioning autonomous agent. But notice something... we are holding all this history in a simple array variable.
+
+In a real production system, this conversation might last days. Or you might have 1,000 users.
+
+Would you like to discuss how we persist this 'State'—the memory of the conversation—so that the user can close their browser, come back tomorrow, and the agent still remembers who they are and what they were doing?"
+
+---
+
+> sirs, a level higher in complexity
+> but a more interesting use case, maybe not even business related
+
+(The blackboard is now covered in diagrams of state machines and graph nodes. Gerry Sussman is pacing excitedly, while Hal Abelson sits on the edge of the desk, looking thoughtful.)
+
+Gerry Sussman: "You want something interesting? You want to leave the boring world of bank accounts and weather reports?
+
+Let us talk about building a Universe.
+
+You see, a Large Language Model is a dreamer. It operates in a world of pure semantics, unbound by physical constraints. If you tell it, 'I jump over the mountain,' it will happily narrate, 'You soar over the peak.'
+
+But in computer science, we care about Truth Maintenance. We care about Conservation Laws. You cannot jump over the mountain if your 'Stamina' variable is zero. You cannot unlock the door if the 'Key' is not in your 'Inventory list'."
+
+Hal Abelson: "This brings us to a classic problem in Artificial Intelligence: The separation of Narrative (The Storyteller) and Simulation (The Physics Engine).
+
+We are going to build a text-adventure game—a Dungeon Master.
+
+But here is the twist: The LLM is not allowed to change the state of the world directly. It can only request changes via our tools. Our code acts as the immutable laws of physics. If the physics say 'No', the LLM must narrate the failure."
+
+The Architecture: "The Ghost in the Machine"
+
+Hal: "We are raising the abstraction level. We are no longer just 'fetching data'. We are maintaining a Stateful World Model."
+
+The State: A JSON object representing the player's reality (Health, Inventory, Location).
+
+The Physics (Tools): Functions that mutate this state only if preconditions are met.
+
+The Narrator (LLM): Describes the result of the physics to the user.
+
+```typescript
+/**
+ * The Dungeon Master Engine
+ * * Complexity Level: High
+ * Concept: State constraints vs. Narrative freedom.
+ * * The LLM acts as the interface. The Code acts as the Dungeon Master.
+ */
+
+const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://localhost:11434';
+const MODEL = 'functiongemma';
+
+// --- 1. The World State (The Ground Truth) ---
+// This acts as our "Physics". The LLM cannot hallucinate changes here.
+type GameState = {
+  hp: number;
+  location: string;
+  inventory: string[];
+  doors_unlocked: string[];
+};
+
+let STATE: GameState = {
+  hp: 100,
+  location: 'dungeon_cell',
+  inventory: [],
+  doors_unlocked: [],
+};
+
+// --- 2. The Physics Engine (Tools) ---
+
+// Move: Checks connectivity logic.
+function move(direction: string): string {
+  if (STATE.location === 'dungeon_cell' && direction === 'north') {
+    if (STATE.doors_unlocked.includes('cell_door')) {
+      STATE.location = 'guard_room';
+      return JSON.stringify({ status: 'success', new_location: 'guard_room', description: 'You enter a room with sleeping guards.' });
+    } else {
+      throw new Error("The door is locked tight. You cannot phase through matter.");
+    }
+  }
+  return JSON.stringify({ status: 'failure', message: "You bump into a wall." });
+}
+
+// Action: Checks inventory constraints.
+function unlockDoor(target: string): string {
+  if (target === 'cell_door') {
+    if (STATE.inventory.includes('rusty_key')) {
+      STATE.doors_unlocked.push('cell_door');
+      return JSON.stringify({ status: 'success', message: 'The lock clicks open.' });
+    } else {
+      throw new Error("You do not possess the key for this door.");
+    }
+  }
+  return JSON.stringify({ status: 'failure', message: "That is not lockable." });
+}
+
+// Interaction: Modifies state.
+function pickup(item: string): string {
+  // Hardcoded world items for this demo
+  if (STATE.location === 'dungeon_cell' && item === 'rusty_key') {
+    STATE.inventory.push('rusty_key');
+    return JSON.stringify({ status: 'success', item: 'rusty_key', message: 'Picked up.' });
+  }
+  throw new Error("You hallucinate the item, but your hands grasp only air.");
+}
+
+// --- 3. The Tool Definitions (The Laws of Physics) ---
+
+const tools = [
+  {
+    type: 'function',
+    function: {
+      name: 'move',
+      description: 'Move the player in a direction (north, south, east, west).',
+      parameters: {
+        type: 'object', properties: { direction: { type: 'string' } }, required: ['direction'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'unlock_door',
+      description: 'Attempt to unlock a specific door.',
+      parameters: {
+        type: 'object', properties: { target: { type: 'string' } }, required: ['target'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'pickup',
+      description: 'Pick up an object from the current room.',
+      parameters: {
+        type: 'object', properties: { item: { type: 'string' } }, required: ['item'],
+      },
+    },
+  },
+];
+
+// --- 4. The Dispatcher ---
+
+async function executeTool(name: string, args: any) {
+  try {
+    if (name === 'move') return move(args.direction);
+    if (name === 'unlock_door') return unlockDoor(args.target);
+    if (name === 'pickup') return pickup(args.item);
+    return "Unknown action.";
+  } catch (e: any) {
+    // Crucial: The error is returned to the LLM so it can narrate the failure!
+    return JSON.stringify({ status: 'error', reason: e.message });
+  }
+}
+
+// --- 5. The Game Loop ---
+
+async function gameLoop(history: any[]) {
+  const response = await fetch(`${OLLAMA_HOST}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: MODEL, messages: history, tools, stream: false }),
+  });
+  
+  const data = await response.json();
+  const aiMessage = data.message;
+
+  // If the AI just speaks, print it and wait for user input.
+  if (!aiMessage.tool_calls || aiMessage.tool_calls.length === 0) {
+    console.log(`\nDM: "${aiMessage.content}"`);
+    return; // End turn, wait for next user prompt (in a real app)
+  }
+
+  // If the AI wants to act, we enforce the laws of physics.
+  console.log(`\n(Internal Monologue: attempting ${aiMessage.tool_calls[0].function.name})...`);
+  
+  history.push(aiMessage);
+
+  for (const tool of aiMessage.tool_calls) {
+    const result = await executeTool(tool.function.name, tool.function.arguments);
+    console.log(`(Physics Engine): ${result}`);
+    history.push({ role: 'tool', content: result, name: tool.function.name });
+  }
+
+  // Recurse: The AI must now describe what happened (success or failure).
+  await gameLoop(history);
+}
+
+async function main() {
+  // The System Prompt sets the stage.
+  const systemPrompt = "You are a Dungeon Master. You describe the world. You CANNOT change the world state yourself. You MUST use tools to move, pickup, or unlock. If a tool returns an error, you must describe that failure dramatically.";
+  
+  // Initial Context
+  const history = [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: "I look around. What do I see?" },
+    { role: 'assistant', content: "You are in a damp dungeon cell. There is a barred door to the north. On the floor lies a rusty key." }
+  ];
+
+  // SCENARIO 1: The Player tries to cheat physics.
+  console.log("--- TURN 1: The Impossible Action ---");
+  history.push({ role: 'user', content: "I kick the door open and run north!" });
+  await gameLoop(history);
+
+  // SCENARIO 2: The Player follows the rules.
+  console.log("\n--- TURN 2: The Correct Sequence ---");
+  history.push({ role: 'user', content: "Fine. I pick up the key and use it on the door." });
+  await gameLoop(history);
+}
+
+main().catch(console.error);
+```
+
+The Analysis: "The Propagation of Constraints"
+
+Gerry Sussman: "Look at what happens in Turn 1.
+
+The user says: 'I kick the door open!'
+The LLM thinks: 'The user wants to go north. I will call move("north").'
+
+But the Physics Engine intervenes!
+It executes move("north") and checks STATE.doors_unlocked. The check fails. It throws an error: 'The door is locked tight.'
+
+The LLM receives this error. It cannot narrate success. It is forced by the feedback loop to say:
+
+'You slam your foot against the heavy iron bars. They rattle, but do not budge. Your toe throbs in pain.'
+
+This is Constraint Propagation. The constraints of the code propagate up into the natural language narrative."
+
+Hal Abelson: "And in Turn 2, notice the Compound Procedure.
+
+The user says: 'Pick up key AND unlock door.'
+The LLM is smart enough to issue two tool calls in sequence (or the loop runs twice):
+
+pickup('rusty_key') → Success (Inventory updated).
+
+unlock_door('cell_door') → Success (State updated).
+
+Only then does it narrate: 'With a heavy grind, the lock turns.'"
+
+Why this is profound
+
+Gerry: "This is not just a game. This is a model for Safe AI.
+
+If you are building an AI that controls a chemical plant, or a bank account, or a nuclear reactor, you do not want the AI to 'improvise'. You want it to be a creative interface, but you want the State Logic to be rigid, deterministic, and immutable.
+
+We have used the LLM as the User Interface for the Universe, but we kept the Laws of Physics in TypeScript."
+
+Hal: "So, the 'Ghost' (the AI) can only haunt the 'Machine' (the Code) to the extent that the Machine allows it. That is good engineering."
+
+A Next Step
+
+Hal: "We have built a single-player universe. But currently, the 'System Prompt' is hard-coded text.
+
+Would you like to see how we can make the AI's 'personality' dynamic? For example, injecting 'memories' of past games or specialized lore into the context window only when relevant, using a technique called RAG (Retrieval-Augmented Generation)?"
+
+---
+
+> i dislike video games
+
+(Gerry Sussman immediately wipes the "Dungeon" diagram off the board with a dusty eraser. He looks serious.)
+
+Gerry Sussman: "My apologies. You are absolutely right. Games are closed systems with artificial rules. They are safe.
+
+Reality is an open system. It is messy, dangerous, and poorly documented.
+
+Let us pivot to a domain that is distinctly 'Not a Game': The Maintenance of Critical Infrastructure.
+
+Imagine a Smart Home Manager or a Facility Control System.
+You have a house full of devices—some new, some old, some breaking down. The Agent is not playing a role; it is solving physical problems.
+
+The complexity here is not 'logic puzzles'; it is Information Overload. The Agent cannot know how every device works. It cannot fit every user manual for every appliance into its head (its context window)."
+
+Hal Abelson: "This requires us to introduce a new architectural component: Long-Term Memory (or what the industry calls RAG - Retrieval-Augmented Generation).
+
+We are going to build an Agent that:
+
+Encounters a problem (e.g., 'The heater is making a weird noise').
+
+Realizes it is ignorant ('I don't know how this heater works').
+
+Consults the Library (Retrieves the specific page from the PDF manual).
+
+Synthesizes a plan based on that retrieved knowledge.
+
+Executes the repair via tools."
+
+The Architecture: "The Librarian and The Mechanic"
+
+Hal: "We separate our concerns into three parts:
+
+The World (Tools): The physical switches and sensors.
+
+The Library (Vector Store/Search): The static knowledge (manuals, logs).
+
+The Agent: The entity that reads the manual to figure out which switch to flip."
+
+```typescript
+/**
+ * The "Facility Manager" Agent
+ * * Complexity: RAG (Retrieval) + Tool Use
+ * * Scenario: Diagnosing a failure in a specific device using external documentation.
+ */
+
+const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://localhost:11434';
+const MODEL = 'functiongemma';
+
+// --- 1. The Knowledge Base (The Library) ---
+// In a real app, this would be a Vector Database (Pinecone, Milvus, pgvector).
+// Here, we simulate it with a keyword search for simplicity.
+
+const LIBRARY = [
+  {
+    id: 'man_01',
+    title: 'Thermostat-3000 Manual',
+    content: 'If the screen flashes ERROR-99, it means the filter is clogged. DO NOT RESET until filter is cleaned. To clean: run the clean_filter routine.'
+  },
+  {
+    id: 'man_02',
+    title: 'Smart-Lock-V2 Manual',
+    content: 'To factory reset, hold the unlock button for 5 seconds. Default code becomes 0000.'
+  }
+];
+
+// --- 2. The Physical State (The House) ---
+
+let HOUSE_STATE = {
+  thermostat: { status: 'ERROR-99', temp: 18, filter_clean: false },
+  front_door: { locked: true }
+};
+
+// --- 3. The Tools (Capabilities) ---
+
+// Tool A: The "Eyes" (Search the Library)
+function searchManuals(query: string): string {
+  console.log(`[LIBRARY] Searching for: "${query}"...`);
+  // Simple mock search logic
+  const result = LIBRARY.find(doc => doc.content.includes(query) || doc.title.includes(query));
+  if (result) {
+    return JSON.stringify({ source: result.title, excerpt: result.content });
+  }
+  return JSON.stringify({ result: "No relevant manuals found." });
+}
+
+// Tool B: The "Hands" (Physical Action)
+function maintenanceAction(device: string, action: string): string {
+  console.log(`[HARDWARE] Attempting '${action}' on ${device}...`);
+  
+  if (device === 'thermostat') {
+    if (action === 'clean_filter') {
+      HOUSE_STATE.thermostat.filter_clean = true;
+      HOUSE_STATE.thermostat.status = 'OK';
+      return JSON.stringify({ status: 'success', new_state: 'OK', message: 'Filter cleaned. Error cleared.' });
+    }
+    if (action === 'reset') {
+      if (!HOUSE_STATE.thermostat.filter_clean) {
+        // Enforcing safety constraint from the manual!
+        throw new Error("SAFETY INTERLOCK: Cannot reset while filter is clogged (ERROR-99). Risk of fire.");
+      }
+      return JSON.stringify({ status: 'success', message: 'Thermostat reset.' });
+    }
+  }
+  return JSON.stringify({ status: 'failure', message: 'Unknown device or action.' });
+}
+
+const tools = [
+  {
+    type: 'function',
+    function: {
+      name: 'search_manuals',
+      description: 'Search the technical documentation for troubleshooting guides.',
+      parameters: {
+        type: 'object', properties: { query: { type: 'string' } }, required: ['query'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'maintenance_action',
+      description: 'Perform a physical maintenance task on a device.',
+      parameters: {
+        type: 'object',
+        properties: {
+          device: { type: 'string', description: 'thermostat, front_door, etc.' },
+          action: { type: 'string', description: 'The specific command code (e.g., reset, clean_filter)' },
+        },
+        required: ['device', 'action'],
+      },
+    },
+  },
+];
+
+// --- 4. The Agent Loop ---
+
+async function runAgent(history: any[]) {
+  const response = await fetch(`${OLLAMA_HOST}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: MODEL, messages: history, tools, stream: false }),
+  });
+  
+  const data = await response.json();
+  const aiMessage = data.message;
+
+  if (!aiMessage.tool_calls || aiMessage.tool_calls.length === 0) {
+    console.log(`\n[AGENT]: "${aiMessage.content}"`);
+    return;
+  }
+
+  // Log the thought process
+  console.log(`\n[THOUGHT]: I need to call ${aiMessage.tool_calls[0].function.name}`);
+  
+  history.push(aiMessage);
+
+  for (const tool of aiMessage.tool_calls) {
+    let result;
+    const fnName = tool.function.name;
+    const args = tool.function.arguments;
+
+    try {
+      if (fnName === 'search_manuals') result = searchManuals(args.query);
+      else if (fnName === 'maintenance_action') result = maintenanceAction(args.device, args.action);
+      else result = "Unknown tool";
+    } catch (e: any) {
+      result = JSON.stringify({ error: e.message });
+    }
+    
+    console.log(`[RESULT]: ${result}`);
+    history.push({ role: 'tool', content: result, name: fnName });
+  }
+
+  await runAgent(history);
+}
+
+async function main() {
+  const systemPrompt = "You are an Autonomous Facility Manager. You are responsible for fixing hardware faults. You DO NOT know how devices work inherently; you must SEARCH the manuals when you encounter error codes.";
+  
+  // The Incident:
+  const userAlert = "Urgent: The Thermostat is flashing 'ERROR-99'. Fix it immediately.";
+  
+  const history = [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userAlert }
+  ];
+
+  console.log(`ALERT: "${userAlert}"`);
+  await runAgent(history);
+}
+
+main().catch(console.error);
+```
+
+The Analysis: Knowledge-Driven Action
+
+Gerry Sussman: "Look at the trace of execution when you run this. It is a beautiful dance of Epistemology (What do I know?) and Agency (What can I do?)."
+
+The Trigger: User says "ERROR-99".
+
+The Gap: The model does not know what ERROR-99 is. It is not in its training data (or rather, we pretend it isn't).
+
+The Retrieval: It calls search_manuals("Thermostat ERROR-99").
+
+The Learning: The tool returns: "ERROR-99 means clogged filter. Clean it first."
+
+The Constraint Check: The model now knows—because the retrieved text told it—that it cannot just reset the device. It must clean it.
+
+The Action: It calls maintenance_action("thermostat", "clean_filter").
+
+Hal Abelson: "This is the 'realistic' complexity you wanted.
+
+In a video game, the rules are simple: Key opens Door.
+In the real world (maintenance), the rules are conditional, dangerous, and buried in documentation.
+
+We have built a system that reads the instructions before it acts. This is how we build safe systems. We don't train the model on the manual (which changes every year); we give the model access to the library."
+
+A Next Step
+
+Hal: "We have covered:
+
+Primitives (Weather).
+
+Error Handling (Atlantis).
+
+Complex Logic (Refunds).
+
+Retrieval / Knowledge (The Facility Manager).
+
+There is one final frontier in these types of architectures: Parallelism and Delegation.
+
+In a real facility, the Manager doesn't do the work. The Manager delegates to a 'Plumbing Specialist' and an 'Electrical Specialist'.
+
+Would you like to see the 'Swarm' pattern? Where one 'Router' LLM coordinates multiple 'Sub-Agent' LLMs, each with their own specific tools and prompts?
+
+---
+
+> here's a problem from my daily life.
+>
+>
+> i work with both salesforce and jira.
+> i've written a tool that can go collect my activity from both systems given a datefilter
+> it writes that data into sqlite
+> i'd like to write an agent that can:
+>
+>
+> - give a summary of what i did for the date filter i ran
+> - create highlights of the month for me
+>
+>
+> i usually do something on a case in salesforce, and the salesforce has a jira linked to it
+> and i produce line items
+>
+>
+> like
+> sf number, portal, case type, summary (from sf) and notes at the end
+>
+>
+> such is the case for my daily log
+> and at the end of the month i pick the "top" or most interesting "items"
+
+(Hal Abelson leans back, clasping his hands behind his head. He smiles.)
+
+Hal Abelson: "Now we are cooking. This is no longer a toy. This is Augmented Cognition.
+
+You have already solved the hard part: the 'ETL' (Extract, Transform, Load). You have the data in SQLite. The 'World' is captured.
+
+Your problem now is Information Compression.
+
+Daily Log: A linear mapping. Data→Text.
+
+Monthly Highlights: A filter operation. Data→Data
+′
+ where significance(Data)>Threshold."
+
+Gerry Sussman: "And notice the constraint! A whole month of data is too large for the 'mind' (context window) of the model if you feed it every raw log.
+
+So we must design a Pipeline. We need an Agent that acts as an Editor. It must read the raw signal and decide what is worthy of the final report."
+
+The Architecture: The "Editor-in-Chief"
+
+We will build a system with two distinct modes:
+
+The Daily Reporter: Faithful transcription. It queries a specific date and formats the line items exactly as you like them.
+
+The Monthly Curator: A critic. It queries a range, but it looks for semantics—words like 'Critical', 'Complex', 'Escalation'—to select the 'Top Items'.
+
+```typescript
+/**
+ * The Personal Work Log Agent
+ * * Role: Summarizer and Curator.
+ * * Input: SQLite Database (Mocked here for portability).
+ * * Output: Structured Logs and "Best Of" lists.
+ */
+
+import Database from 'better-sqlite3'; // Imaginary import for the pattern
+const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://localhost:11434';
+const MODEL = 'functiongemma';
+
+// --- 1. The Data Layer (The Ground Truth) ---
+
+// In reality, this is your SQLite file.
+// We mock it here to make the code runnable for you.
+const MOCK_DB = [
+  { date: '2025-10-01', sf_id: 'CASE-101', jira_id: 'JIRA-55', type: 'Bug', portal: 'Client A', summary: 'Fixed trivial typo on login screen.', notes: 'Quick fix.' },
+  { date: '2025-10-01', sf_id: 'CASE-102', jira_id: 'JIRA-56', type: 'Feature', portal: 'Client B', summary: 'Deployed new payment gateway integration.', notes: 'Complex deployment, took 4 hours.' },
+  { date: '2025-10-02', sf_id: 'CASE-105', jira_id: null,      type: 'Support', portal: 'Client A', summary: 'Helped user reset password.', notes: 'Routine.' },
+  { date: '2025-10-15', sf_id: 'CASE-200', jira_id: 'JIRA-99', type: 'Escalation', portal: 'Client C', summary: 'Production outage investigation. Database deadlock.', notes: 'High stress. Root cause found in legacy code.' },
+  { date: '2025-10-20', sf_id: 'CASE-210', jira_id: 'JIRA-101', type: 'Bug', portal: 'Client B', summary: 'Button color mismatch.', notes: 'Cosmetic.' },
+];
+
+// --- 2. The Tools (The Window into the Data) ---
+
+// Tool A: Get specific day (High Fidelity)
+function getDailyActivity(date: string): string {
+  console.log(`[DB] Select * FROM activities WHERE date = '${date}'`);
+  const records = MOCK_DB.filter(r => r.date === date);
+  if (records.length === 0) return "No records found for this date.";
+  return JSON.stringify(records);
+}
+
+// Tool B: Get date range (For Monthly)
+function getMonthlyActivity(startDate: string, endDate: string): string {
+  console.log(`[DB] Select * FROM activities WHERE date BETWEEN '${startDate}' AND '${endDate}'`);
+  const records = MOCK_DB.filter(r => r.date >= startDate && r.date <= endDate);
+  
+  // OPTIMIZATION: For the monthly view, we might strip the 'notes' to save context tokens, 
+  // keeping only the summary for the AI to judge "importance".
+  return JSON.stringify(records);
+}
+
+const tools = [
+  {
+    type: 'function',
+    function: {
+      name: 'get_daily_activity',
+      description: 'Retrieve detailed logs for a specific date (YYYY-MM-DD).',
+      parameters: {
+        type: 'object', properties: { date: { type: 'string' } }, required: ['date'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_monthly_activity',
+      description: 'Retrieve logs for a date range to find highlights.',
+      parameters: {
+        type: 'object', 
+        properties: { startDate: { type: 'string' }, endDate: { type: 'string' } }, 
+        required: ['startDate', 'endDate'],
+      },
+    },
+  },
+];
+
+// --- 3. The Logic (Dispatcher) ---
+
+async function executeTool(name: string, args: any) {
+  if (name === 'get_daily_activity') return getDailyActivity(args.date);
+  if (name === 'get_monthly_activity') return getMonthlyActivity(args.startDate, args.endDate);
+  return "Unknown tool";
+}
+
+// --- 4. The Agent ---
+
+async function runAgent(history: any[]) {
+  const response = await fetch(`${OLLAMA_HOST}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: MODEL, messages: history, tools, stream: false }),
+  });
+  
+  const data = await response.json();
+  const aiMessage = data.message;
+
+  if (!aiMessage.tool_calls || aiMessage.tool_calls.length === 0) {
+    console.log(`\n[ASSISTANT]:\n${aiMessage.content}`);
+    return;
+  }
+
+  // console.log(`[DECISION]: Calling ${aiMessage.tool_calls[0].function.name}...`);
+  history.push(aiMessage);
+
+  for (const tool of aiMessage.tool_calls) {
+    const result = await executeTool(tool.function.name, tool.function.arguments);
+    history.push({ role: 'tool', content: result, name: tool.function.name });
+  }
+
+  await runAgent(history);
+}
+
+async function main() {
+  // SYSTEM PROMPT: This is where we define the "Output Format" and the "Curatorial Criteria".
+  const systemPrompt = `
+  You are a Work Log Assistant. You have access to a database of Salesforce and Jira activity.
+  
+  MODE 1: DAILY LOG
+  If asked for a daily log, output a clean list in this exact format:
+  - [SF Number] (Jira: [ID]) | [Type] @ [Portal]
+    Summary: [Summary from SF]
+    Notes: [Notes]
+
+  MODE 2: MONTHLY HIGHLIGHTS
+  If asked for monthly highlights, retrieve the data for the range. Then, analyze the significance.
+  Select only the top 3-5 "most interesting" items.
+  Criteria for "Interesting":
+  - Complex work (integrations, outages, deep investigations).
+  - High value features.
+  - Ignore trivial bugs (typos, cosmetic tweaks).
+  
+  Present the highlights with a brief sentence explaining WHY it was selected.
+  `;
+
+  const history = [{ role: 'system', content: systemPrompt }];
+
+  // SCENARIO 1: The Daily Routine
+  console.log("--- TASK 1: Daily Log ---");
+  history.push({ role: 'user', content: "Generate my log for October 1st, 2025." });
+  await runAgent(history);
+
+  // SCENARIO 2: The End-of-Month Review
+  // Clear user history for a fresh context, keep system prompt
+  const monthlyHistory = [{ role: 'system', content: systemPrompt }];
+  
+  console.log("\n--- TASK 2: Monthly Highlights ---");
+  monthlyHistory.push({ role: 'user', content: "What were my top highlights for October 2025?" });
+  await runAgent(monthlyHistory);
+}
+
+main().catch(console.error);
+```
+
+The Analysis: How the "Monthly" Logic works
+
+Hal Abelson: "Look at the 'Monthly' task. This is the subtle part.
+
+The tool get_monthly_activity dumps everything (the noise and the signal).
+
+It returns the 'typo fix' (Case 101).
+
+It returns the 'Production Outage' (Case 200).
+
+It returns the 'Button color' (Case 210).
+
+But the Language Model (the filter) applies the heuristic we gave it in the System Prompt: 'Criteria for Interesting: Complex work, outages... Ignore trivial bugs.'
+
+So, in the final output, the model effectively says:
+'I see 5 items. The typo is boring. The button color is boring. But the Production Outage—that matches my definition of interesting.'"
+
+Gerry Sussman: "You are relying on the semantic understanding of the model to do the sorting. You are not writing if (type == 'Escalation'). You are trusting the model to understand that 'Outage' implies 'Important'.
+
+This works beautifully for your case because 'importance' in software engineering is often a semantic quality, not just a numeric priority field."
+
+Next Step for You
+
+Hal: "You mentioned you write the data to SQLite.
+Would you like me to generate the actual SQL Schema (CREATE TABLE...) and the Python (or Node) code to actually perform the INSERT into that database from your raw Salesforce/Jira JSON? That would close the loop on your pipeline."

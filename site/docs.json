@@ -94,6 +94,17 @@
             ]
           }
         ]
+      },
+      {
+        "tab": "lou+gemini",
+        "groups": [
+          {
+            "group": "Dialogues",
+            "pages": [
+              "lou-gemini/abelson-sussman-tool-use"
+            ]
+          }
+        ]
       }
     ],
     "global": {
