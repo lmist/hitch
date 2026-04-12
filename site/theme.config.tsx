@@ -17,8 +17,8 @@ const config: DocsThemeConfig = {
     float: true,
   },
   color: {
-    hue: 30,
-    saturation: 30,
+    hue: 358,
+    saturation: 52,
   },
   darkMode: true,
   nextThemes: {

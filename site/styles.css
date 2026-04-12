@@ -3,54 +3,68 @@ html {
   color-scheme: dark;
 }
 
-/* Dark theme — match Mintlify quill */
+/* Dark theme — match Mintlify willow */
 html[class~="dark"] {
-  background-color: #111110;
+  background-color: #090908;
 }
 
 html[class~="dark"] .nextra-sidebar-container {
-  background-color: #111110;
+  background-color: #090908;
+  border-color: #1a1918;
 }
 
 html[class~="dark"] .nextra-nav-container-blur {
-  background-color: rgba(17, 17, 16, 0.85);
+  background-color: rgba(9, 9, 8, 0.85);
 }
 
 html[class~="dark"] article {
-  color: #e8e5e0;
+  color: #e8e5df;
 }
 
 html[class~="dark"] h1,
 html[class~="dark"] h2,
 html[class~="dark"] h3,
 html[class~="dark"] h4 {
-  color: #f5f3ef;
+  color: #f7ecd7;
 }
 
-/* Subtle warm accent on links */
+/* Primary red accent on links */
 html[class~="dark"] a {
-  color: #d4a574;
+  color: #bf3b41;
 }
 
 html[class~="dark"] a:hover {
-  color: #e8c09a;
+  color: #d4555b;
+}
+
+/* Sidebar active item */
+html[class~="dark"] .nextra-sidebar-container li.active > a {
+  color: #bf3b41;
 }
 
 /* Code blocks */
 html[class~="dark"] pre {
-  background-color: #1a1918 !important;
-  border: 1px solid #2a2826;
+  background-color: #0e0e0d !important;
+  border: 1px solid #1a1918;
 }
 
-/* Light theme fallback */
+/* Light theme */
 html[class~="light"] {
-  background-color: #faf6f1;
+  background-color: #ffffff;
 }
 
 html[class~="light"] .nextra-sidebar-container {
-  background-color: #f5efe8;
+  background-color: #faf8f3;
 }
 
 html[class~="light"] .nextra-nav-container-blur {
-  background-color: rgba(250, 246, 241, 0.85);
+  background-color: rgba(255, 255, 255, 0.85);
+}
+
+html[class~="light"] a {
+  color: #bf3b41;
+}
+
+html[class~="light"] a:hover {
+  color: #a02f34;
 }
