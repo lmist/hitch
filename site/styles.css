@@ -1,10 +1,50 @@
-:root {
-  --warm-bg: #faf6f1;
-  --warm-bg-dark: #1c1917;
+/* Default to dark mode */
+html {
+  color-scheme: dark;
 }
 
+/* Dark theme — match Mintlify quill */
+html[class~="dark"] {
+  background-color: #111110;
+}
+
+html[class~="dark"] .nextra-sidebar-container {
+  background-color: #111110;
+}
+
+html[class~="dark"] .nextra-nav-container-blur {
+  background-color: rgba(17, 17, 16, 0.85);
+}
+
+html[class~="dark"] article {
+  color: #e8e5e0;
+}
+
+html[class~="dark"] h1,
+html[class~="dark"] h2,
+html[class~="dark"] h3,
+html[class~="dark"] h4 {
+  color: #f5f3ef;
+}
+
+/* Subtle warm accent on links */
+html[class~="dark"] a {
+  color: #d4a574;
+}
+
+html[class~="dark"] a:hover {
+  color: #e8c09a;
+}
+
+/* Code blocks */
+html[class~="dark"] pre {
+  background-color: #1a1918 !important;
+  border: 1px solid #2a2826;
+}
+
+/* Light theme fallback */
 html[class~="light"] {
-  background-color: var(--warm-bg);
+  background-color: #faf6f1;
 }
 
 html[class~="light"] .nextra-sidebar-container {
@@ -13,12 +53,4 @@ html[class~="light"] .nextra-sidebar-container {
 
 html[class~="light"] .nextra-nav-container-blur {
   background-color: rgba(250, 246, 241, 0.85);
-}
-
-html[class~="dark"] {
-  background-color: var(--warm-bg-dark);
-}
-
-html[class~="dark"] .nextra-sidebar-container {
-  background-color: #292524;
 }

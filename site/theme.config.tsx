@@ -18,7 +18,11 @@ const config: DocsThemeConfig = {
   },
   color: {
     hue: 30,
-    saturation: 55,
+    saturation: 30,
+  },
+  darkMode: true,
+  nextThemes: {
+    defaultTheme: 'dark',
   },
 }
 
