@@ -1,0 +1,464 @@
+---
+title: "Actions"
+source: "https://docs.oasis.camel-ai.org/key_modules/actions"
+author: "CAMEL-AI OASIS Docs"
+published: "2025-11-13"
+---
+
+# Actions
+
+This section provides detailed information about all available actions and how to configure them in your simulation environment, including the available action types, the predefined `ManualAction` and llm-based `LLMAction`.
+
+Actions for `env.step`
+
+The `actions` parameter passed to the OASIS environment’s `step` method should be a dictionary that specifies what each agent should do at a given timestep, as shown below: 
+
+```
+dict[SocialAgent, Union[List[Union[ManualAction, LLMAction]],Union[ManualAction, LLMAction]]]
+
+```
+
+* The **key** is a `SocialAgent`.
+* The **value** is either:  
+   * A single predefined `ManualAction` or an LLM-generated `LLMAction`, or  
+   * A list of `ManualAction` or `LLMAction` instances, allowing the same agent to perform multiple actions within one timestep.
+
+`LLMAction`
+
+You can use `LLMAction()` to indicate that an agent should perform actions based on the output of an LLM. These actions can include both social actions and external tools, as defined during initialization. An example where all agents use `LLMAction()` to perform actions: 
+
+```
+from oasis import LLMAction
+
+all_llm_actions = {
+    agent: LLMAction()
+    for _, agent in env.agent_graph.get_agents()
+}
+
+await env.step(all_llm_actions)
+
+```
+
+`ManualAction`
+
+You can use `ManualAction()` to indicate that an agent should perform actions based on the predefined `ActionType` and corresponding arguments. 
+* The data structure of `ManualAction`:
+
+```
+@dataclass
+class ManualAction:
+    r"""Some manual predefined social platform actions that need to be
+    executed by certain agents.
+
+    Args:
+        agent_id: The ID of the agent that will perform the action.
+        action: The action to perform.
+        args: The arguments to pass to the action. For details of each args in
+            each action, please refer to
+            `https://github.com/camel-ai/oasis/blob/main/oasis/social_agent/agent_action.py`.
+    """
+    action_type: ActionType
+    action_args: Dict[str, Any]
+
+    def init(self, action_type, action_args):
+        self.action_type = action_type
+        self.action_args = action_args
+
+```
+
+* A example of using `ManualAction()`:
+
+```
+from oasis import ActionType
+
+actions = {}
+
+manual_action = ManualAction(
+    action=ActionType.CREATE_POST,
+    args={"content": "Hello, OASIS world!"}
+)
+
+actions[env.agent_graph.get_agents(0)] = manual_action
+
+await env.step(actions)
+
+```
+
+For more details about the `ActionType` and corresponding arguments, please refer to the [ActionType](#actiontype) section. 
+
+`ActionType`
+
+OASIS provides a comprehensive set of actions that simulate real social media behaviors: 
+
+| Action Type            | Description                                                      |
+| ---------------------- | ---------------------------------------------------------------- |
+| SIGNUP                 | Register a new user with username, name, and bio                 |
+| CREATE\_POST           | Create a new post with text content                              |
+| LIKE\_POST             | Like or upvote a post                                            |
+| UNLIKE\_POST           | Remove a like from a previously liked post                       |
+| DISLIKE\_POST          | Dislike or downvote a post                                       |
+| UNDO\_DISLIKE\_POST    | Remove a dislike from a previously disliked post                 |
+| REPORT\_POST           | Report a post for inappropriate content                          |
+| REPOST                 | Repost content without modification (equivalent to retweet)      |
+| QUOTE\_POST            | Repost with additional commentary                                |
+| CREATE\_COMMENT        | Create a comment on a post                                       |
+| LIKE\_COMMENT          | Like a comment                                                   |
+| UNLIKE\_COMMENT        | Remove a like from a previously liked comment                    |
+| DISLIKE\_COMMENT       | Dislike a comment                                                |
+| UNDO\_DISLIKE\_COMMENT | Remove a dislike from a previously disliked comment              |
+| FOLLOW                 | Follow another user                                              |
+| UNFOLLOW               | Unfollow a previously followed user                              |
+| MUTE                   | Mute another user (hide their content without unfollowing)       |
+| UNMUTE                 | Unmute a previously muted user                                   |
+| SEARCH\_POSTS          | Search for posts by keywords, post ID, or user ID                |
+| SEARCH\_USER           | Search for users by username, name, bio, or user ID              |
+| TREND                  | Get trending content based on popularity metrics                 |
+| REFRESH                | Refresh the timeline to get recommended posts                    |
+| DO\_NOTHING            | Perform no action (pass the turn)                                |
+| PURCHASE\_PRODUCT      | Purchase a product (for e-commerce simulations)                  |
+| INTERVIEW              | Interview a user and record the interview result in the database |
+| CREATE\_GROUP          | Create a new group with a given name                             |
+| JOIN\_GROUP            | Join a group by group ID                                         |
+| LEAVE\_GROUP           | Leave a group by group ID                                        |
+| SEND\_TO\_GROUP        | Send a message to a group                                        |
+| LISTEN\_FROM\_GROUP    | Listen for messages from groups                                  |
+
+Platform-Specific Actions
+
+OASIS provides platform-specific action sets that can be accessed using class methods: 
+
+Reddit Actions
+
+```
+# Get all Reddit-specific actions, return a list of ActionType
+available_actions = ActionType.get_default_reddit_actions()
+
+```
+
+The Reddit action set includes: 
+* `LIKE_POST`
+* `DISLIKE_POST`
+* `CREATE_POST`
+* `CREATE_COMMENT`
+* `LIKE_COMMENT`
+* `DISLIKE_COMMENT`
+* `SEARCH_POSTS`
+* `SEARCH_USER`
+* `TREND`
+* `REFRESH`
+* `DO_NOTHING`
+* `FOLLOW`
+* `MUTE`
+
+Twitter Actions
+
+```
+# Get all Reddit-specific actions, return a list of ActionType
+available_actions = ActionType.get_default_twitter_actions()
+
+```
+
+The Twitter action set includes: 
+* `CREATE_POST`
+* `LIKE_POST`
+* `REPOST`
+* `FOLLOW`
+* `DO_NOTHING`
+* `QUOTE_POST`
+
+Arguments for `ManualAction`
+
+CREATE\_POST
+
+```
+action = ManualAction(
+    action=ActionType.CREATE_POST,
+    args={"content": "Hello, OASIS world!"}
+)
+
+```
+
+LIKE\_POST
+
+```
+action = ManualAction(
+    action=ActionType.LIKE_POST,
+    args={"post_id": 123}
+)
+
+```
+
+UNLIKE\_POST
+
+```
+action = ManualAction(
+    action=ActionType.UNLIKE_POST,
+    args={"post_id": 123}
+)
+
+```
+
+DISLIKE\_POST
+
+```
+action = ManualAction(
+    action=ActionType.DISLIKE_POST,
+    args={"post_id": 123}
+)
+
+```
+
+UNDO\_DISLIKE\_POST
+
+```
+action = ManualAction(
+    action=ActionType.UNDO_DISLIKE_POST,
+    args={"post_id": 123}
+)
+
+```
+
+REPORT\_POST
+
+```
+action = ManualAction(
+    action=ActionType.REPORT_POST,
+    args={
+        "post_id": 123,
+        "report_reason": "This post contains false information"
+    }
+)
+
+```
+
+REPOST
+
+```
+action = ManualAction(
+    action=ActionType.REPOST,
+    args={"post_id": 123}
+)
+
+```
+
+QUOTE\_POST
+
+```
+action = ManualAction(
+    action=ActionType.QUOTE_POST,
+    args={"post_id": 123, "quote_content": "This is amazing content!"}
+)
+
+```
+
+CREATE\_COMMENT
+
+```
+action = ManualAction(
+    action=ActionType.CREATE_COMMENT,
+    args={"post_id": 123, "content": "Great post! I completely agree."}
+)
+
+```
+
+LIKE\_COMMENT
+
+```
+action = ManualAction(
+    action=ActionType.LIKE_COMMENT,
+    args={"comment_id": 456}
+)
+
+```
+
+UNLIKE\_COMMENT
+
+```
+action = ManualAction(
+    action=ActionType.UNLIKE_COMMENT,
+    args={"comment_id": 456}
+)
+
+```
+
+DISLIKE\_COMMENT
+
+```
+action = ManualAction(
+    action=ActionType.DISLIKE_COMMENT,
+    args={"comment_id": 456}
+)
+
+```
+
+UNDO\_DISLIKE\_COMMENT
+
+```
+action = ManualAction(
+    action=ActionType.UNDO_DISLIKE_COMMENT,
+    args={"comment_id": 456}
+)
+
+```
+
+FOLLOW
+
+```
+action = ManualAction(
+    action=ActionType.FOLLOW,
+    args={"followee_id": 789}
+)
+
+```
+
+UNFOLLOW
+
+```
+action = ManualAction(
+    action=ActionType.UNFOLLOW,
+    args={"followee_id": 789}
+)
+
+```
+
+MUTE
+
+```
+action = ManualAction(
+    action=ActionType.MUTE,
+    args={"mutee_id": 789}
+)
+
+```
+
+UNMUTE
+
+```
+action = ManualAction(
+    action=ActionType.UNMUTE,
+    args={"mutee_id": 789}
+)
+
+```
+
+SEARCH\_POSTS
+
+```
+action = ManualAction(
+    action=ActionType.SEARCH_POSTS,
+    args={"query": "artificial intelligence"}
+)
+
+```
+
+SEARCH\_USER
+
+```
+action = ManualAction(
+    action=ActionType.SEARCH_USER,
+    args={"query": "john"}
+)
+
+```
+
+TREND
+
+```
+action = ManualAction(
+    action=ActionType.TREND,
+    args={}
+)
+
+```
+
+REFRESH
+
+```
+action = ManualAction(
+    action=ActionType.REFRESH,
+    args={}
+)
+
+```
+
+DO\_NOTHING
+
+```
+action = ManualAction(
+    action=ActionType.DO_NOTHING,
+    args={}
+)
+
+```
+
+PURCHASE\_PRODUCT
+
+```
+action = ManualAction(
+    action=ActionType.PURCHASE_PRODUCT,
+    args={"product_name": "Premium Subscription", "purchase_num": 1}
+)
+
+```
+
+INTERVIEW
+
+```
+action = ManualAction(
+    action=ActionType.INTERVIEW,
+    args={"prompt": "What is your name?"}
+)
+
+```
+
+CREATE\_GROUP
+
+```
+action = ManualAction(
+    action=ActionType.CREATE_GROUP,
+    args={"group_name": "OASIS Fans"}
+)
+
+```
+
+JOIN\_GROUP
+
+```
+action = ManualAction(
+    action=ActionType.JOIN_GROUP,
+    args={"group_id": 1}
+)
+
+```
+
+LEAVE\_GROUP
+
+```
+action = ManualAction(
+    action=ActionType.LEAVE_GROUP,
+    args={"group_id": 1}
+)
+
+```
+
+SEND\_TO\_GROUP
+
+```
+action = ManualAction(
+    action=ActionType.SEND_TO_GROUP,
+    args={"group_id": 1, "message": "Hello, OASIS fans!"}
+)
+
+```
+
+LISTEN\_FROM\_GROUP
+
+```
+action = ManualAction(
+    action=ActionType.LISTEN_FROM_GROUP,
+    args={}
+)
+
+```
+
+[Platform](https://docs.oasis.camel-ai.org/key_modules/actions/key%5Fmodules/platform)[Twitter Simulation](https://docs.oasis.camel-ai.org/key_modules/actions/cookbooks/twitter%5Fsimulation)

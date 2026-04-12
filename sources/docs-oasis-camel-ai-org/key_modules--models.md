@@ -1,0 +1,70 @@
+---
+title: "Models"
+source: "https://docs.oasis.camel-ai.org/key_modules/models"
+author: "CAMEL-AI OASIS Docs"
+published: "2026-02-19"
+---
+
+# Models
+
+This section introduces the LLM models of Social Agent in OASIS.
+
+Models
+
+OASIS supports all models listed in `camel` here: <https://docs.camel-ai.org/key%5Fmodules/models>. Note that only models with tool-calling support can successfully perform actions in OASIS. You can pass a `ModelBackend`, `List[ModelBackend]` or `ModelManager` as needed. For example, the OPENAI model: 
+
+```
+from camel.models import ModelFactory
+from camel.types import ModelPlatformType, ModelType
+from camel.configs import ChatGPTConfig
+
+# Define the model, here in this case we use gpt-4o-mini
+model = ModelFactory.create(
+    model_platform=ModelPlatformType.OPENAI,
+    model_type=ModelType.GPT_4O_MINI,
+    model_config_dict=ChatGPTConfig().as_dict(),
+)
+
+```
+
+For the vLLM model, note that to deploy the model with tool-calling capabilities, you should refer to the documentation here: <https://docs.vllm.ai/en/latest/features/tool%5Fcalling.html>. 
+
+```
+from camel.models import ModelFactory
+from camel.types import ModelPlatformType
+
+vllm_model = ModelFactory.create(
+    model_platform=ModelPlatformType.VLLM,
+    model_type="microsoft/Phi-3-mini-4k-instruct",
+    url="http://localhost:8000/v1", # Optional
+    model_config_dict={"temperature": 0.0}, # Optional
+)
+
+```
+
+For the ModelManager, you can define the scheduling strategy as needed.`round_robin` is the recommended strategy for load balancing on multiple models among agents. 
+
+```
+from camel.models import ModelFactory, ModelManager
+from camel.types import ModelPlatformType
+
+vllm_model_1 = ModelFactory.create(
+    model_platform=ModelPlatformType.VLLM,
+    model_type="qwen-2",
+    url="http://localhost:8000/v1", # Optional
+)
+
+vllm_model_2 = ModelFactory.create(
+    model_platform=ModelPlatformType.VLLM,
+    model_type="qwen-2",
+    url="http://localhost:8001/v1", # Optional
+)
+
+model_manager = ModelManager(
+    models=[vllm_model_1, vllm_model_2],
+    scheduling_strategy='round_robin',
+)
+
+```
+
+[Social Agent](https://docs.oasis.camel-ai.org/key_modules/models/key%5Fmodules/social%5Fagent)[Toolkits](https://docs.oasis.camel-ai.org/key_modules/models/key%5Fmodules/toolkits)
