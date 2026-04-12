@@ -26,7 +26,7 @@ One of the infuriating things about working with ChatGPT Code Interpreter is tha
 
 I’ve found it to be quite resistant to compiling C code in the past. Here’s a prompting sequence trick that usually works for me:
 
-&gt; Use your code interpreter tool to show me the version of your Python and SQLite
+> Use your code interpreter tool to show me the version of your Python and SQLite
 
 It generated and ran this code:
 
@@ -47,7 +47,7 @@ Which output:
 
 Next we need it to acknowledge that it has access to `gcc`:
 
-&gt; Now use subprocess.run() to call “gcc --version” and tell me that version
+> Now use subprocess.run() to call “gcc --version” and tell me that version
 
 If all goes well it will run something like this:
 
@@ -73,16 +73,16 @@ If you ask it for a SQLite extension it will default to typing out the code for 
 
 Try this:
 
-&gt; Write a SQLite extension in C that provides a math\_sin(a) function. Save that extension file to disk, then give me a link to download it.
+> Write a SQLite extension in C that provides a math\_sin(a) function. Save that extension file to disk, then give me a link to download it.
 
 We don’t actually care about downloading the file, but this provides an excuse (do we need one? I don’t know!) for saving it to disk.
 
 It ran this:
 
 sin_extension_c = """
-#include &lt;sqlite3ext.h&gt;
+#include &lt;sqlite3ext.h>
 SQLITE_EXTENSION_INIT1
-#include &lt;math.h&gt;
+#include &lt;math.h>
 
 static void math_sin(sqlite3_context *context, int argc, sqlite3_value **argv) \{
     double input = sqlite3_value_double(argv[0]);
@@ -109,7 +109,7 @@ And gave me a link to download the file.
 
 Next, I prompted:
 
-&gt; Now use subprocess.run to compile it with gcc, like how you showed me the gcc version earlier
+> Now use subprocess.run to compile it with gcc, like how you showed me the gcc version earlier
 
 I’m trying to avoid it claiming it can’t compile code by referencing back to the earlier successful invocation of `gcc --version`.
 
@@ -132,22 +132,22 @@ Output:
 
 ChatGPT added:
 
-&gt; It looks like there was an error during the compilation process. The error message suggests that `NULL` is undeclared because the `&lt;stddef.h&gt;` header file, which defines `NULL`, was not included.
-&gt; 
-&gt; I’ll update the C code to include this header and attempt the compilation again.
+> It looks like there was an error during the compilation process. The error message suggests that `NULL` is undeclared because the `&lt;stddef.h>` header file, which defines `NULL`, was not included.
+> 
+> I’ll update the C code to include this header and attempt the compilation again.
 
 It said it was going to update the C code but didn’t actually do that at all—it just stopped. So I said:
 
-&gt; Do that
+> Do that
 
 And it did! Here’s the code it successfully ran:
 
-# Update the C code to include &lt;stddef.h&gt;
+# Update the C code to include &lt;stddef.h>
 sin_extension_c_updated = """
-#include &lt;sqlite3ext.h&gt;
+#include &lt;sqlite3ext.h>
 SQLITE_EXTENSION_INIT1
-#include &lt;math.h&gt;
-#include &lt;stddef.h&gt;
+#include &lt;math.h>
+#include &lt;stddef.h>
 
 static void math_sin(sqlite3_context *context, int argc, sqlite3_value **argv) \{
     double input = sqlite3_value_double(argv[0]);
@@ -180,7 +180,7 @@ Both `stdout` and `stderr` were blank, indicating a successfully compiled SQLite
 
 With the SQLite extension compiled the next step is to see if it actually works. I said:
 
-&gt; Now load that extension into SQLite in Python and try it out
+> Now load that extension into SQLite in Python and try it out
 
 It wrote and then ran the following:
 
@@ -218,18 +218,18 @@ OperationalError: /mnt/data/sin_extension.so: undefined symbol: sqlite3_sinexten
 
 Here’s where the real magic of Code Interpreter kicked in. Without any further interaction from me, it said the following:
 
-&gt; It looks like there was an error loading the extension into SQLite. The error message indicates that the symbol `sqlite3_sinextension_init` is undefined. This is likely because the entry point function for the extension is not named correctly.
-&gt; 
-&gt; In the C code, the entry point function is named `sqlite3_sin_init`. However, SQLite expects the entry point function to be named `sqlite3_extension_init` or `sqlite3_&lt;extension_name&gt;_init`. In this case, the expected name would be `sqlite3_sinextension_init`.
-&gt; 
-&gt; I’ll update the C code to rename the entry point function to `sqlite3_sinextension_init` and recompile the extension. ​ ​
+> It looks like there was an error loading the extension into SQLite. The error message indicates that the symbol `sqlite3_sinextension_init` is undefined. This is likely because the entry point function for the extension is not named correctly.
+> 
+> In the C code, the entry point function is named `sqlite3_sin_init`. However, SQLite expects the entry point function to be named `sqlite3_extension_init` or `sqlite3_&lt;extension_name>_init`. In this case, the expected name would be `sqlite3_sinextension_init`.
+> 
+> I’ll update the C code to rename the entry point function to `sqlite3_sinextension_init` and recompile the extension. ​ ​
 
 # Update the C code to rename the entry point function
 sin_extension_c_final = """
-#include &lt;sqlite3ext.h&gt;
+#include &lt;sqlite3ext.h>
 SQLITE_EXTENSION_INIT1
-#include &lt;math.h&gt;
-#include &lt;stddef.h&gt;
+#include &lt;math.h>
+#include &lt;stddef.h>
 
 static void math_sin(sqlite3_context *context, int argc, sqlite3_value **argv) \{
     double input = sqlite3_value_double(argv[0]);
@@ -258,7 +258,7 @@ result_final.stdout, result_final.stderr
 
 The compilation succeeded... so it said:
 
-&gt; The updated SQLite extension has been successfully recompiled with the correct entry point function name. Let’s try loading the extension into SQLite again and test the `math_sin` function. ​
+> The updated SQLite extension has been successfully recompiled with the correct entry point function name. Let’s try loading the extension into SQLite again and test the `math_sin` function. ​
 
 Then it ran this:
 
@@ -294,31 +294,31 @@ My actual goal here was more ambitious: I wanted a SQL function that could calcu
 
 I won’t provide a blow-by-blow account of how I got there, but I started with this prompt:
 
-&gt; def encode(values):
-&gt;    return struct.pack("&lt;" + "f" * len(values), *values)
-&gt; 
-&gt; 
-&gt; def decode(binary):
-&gt;    return struct.unpack("&lt;" + "f" * (len(binary) // 4), binary)
-&gt; 
-&gt; 
-&gt; def cosine_similarity(a, b):
-&gt;    dot_product = sum(x * y for x, y in zip(a, b))
-&gt;    magnitude_a = sum(x * x for x in a) ** 0.5
-&gt;    magnitude_b = sum(x * x for x in b) ** 0.5
-&gt;    return dot_product / (magnitude_a * magnitude_b)
-&gt; 
-&gt; These are Python functions for working with vectors that are stored in SQLite as BLOBs where each BLOB value is a sequence of floating point numbers as binary
-&gt; 
-&gt; Write a new SQLite extension in C that provides three SQL functions:
-&gt; 
-&gt; vector\_decode(blob) -&gt; returns a string that is a JSON formatted array of floats, eg “\[1.1, 2.1, 3.5\]”
-&gt; 
-&gt; vector\_encode(string\_of\_json) -&gt; returns a binary blob for that string. This does not need to use a full JSON parser, it just needs to work with an array that starts with \[ and ends with \] and has comma separated floats, ignoring whitespace
-&gt; 
-&gt; vector\_similarity(blob1, blob2) -&gt; returns floating point cosine similarity for those two encoded vectors
-&gt; 
-&gt; Write it as a file on disk, then compile it and try it out
+> def encode(values):
+>    return struct.pack("&lt;" + "f" * len(values), *values)
+> 
+> 
+> def decode(binary):
+>    return struct.unpack("&lt;" + "f" * (len(binary) // 4), binary)
+> 
+> 
+> def cosine_similarity(a, b):
+>    dot_product = sum(x * y for x, y in zip(a, b))
+>    magnitude_a = sum(x * x for x in a) ** 0.5
+>    magnitude_b = sum(x * x for x in b) ** 0.5
+>    return dot_product / (magnitude_a * magnitude_b)
+> 
+> These are Python functions for working with vectors that are stored in SQLite as BLOBs where each BLOB value is a sequence of floating point numbers as binary
+> 
+> Write a new SQLite extension in C that provides three SQL functions:
+> 
+> vector\_decode(blob) -> returns a string that is a JSON formatted array of floats, eg “\[1.1, 2.1, 3.5\]”
+> 
+> vector\_encode(string\_of\_json) -> returns a binary blob for that string. This does not need to use a full JSON parser, it just needs to work with an array that starts with \[ and ends with \] and has comma separated floats, ignoring whitespace
+> 
+> vector\_similarity(blob1, blob2) -> returns floating point cosine similarity for those two encoded vectors
+> 
+> Write it as a file on disk, then compile it and try it out
 
 I pasted in my existing Python code and told it to write me a SQLite extension based on that code.
 
@@ -340,91 +340,91 @@ The best way out of an error loop is to clear state and start again.
 
 I opened a brand new ChatGPT session and fed it a copy of the code it had previously written that I thought was most likely to work—literally pasting it into the prompt directly:
 
-&gt; Save this to a file called /mnt/data/vector.c and then give me a link to download the file:
-&gt; 
-&gt; #include &lt;sqlite3ext.h&gt;
-&gt; #include &lt;math.h&gt;
-&gt; #include &lt;stdlib.h&gt;
-&gt; #include &lt;string.h&gt;
-&gt; #include &lt;stdio.h&gt;
-&gt; SQLITE_EXTENSION_INIT1
-&gt; 
-&gt; static void vector_decode(sqlite3_context *context, int argc, sqlite3_value **argv) \{
-&gt;    const unsigned char *blob = sqlite3_value_blob(argv[0]);
-&gt;    int size = sqlite3_value_bytes(argv[0]) / sizeof(float);
-&gt;    float *values = (float *)blob;
-&gt; 
-&gt;    char *result = malloc(size * 12 + 2); // Max 10 digits per float + comma + space
-&gt;    char *ptr = result;
-&gt;    *ptr++ = '[';
-&gt;    for (int i = 0; i &lt; size; ++i) \{
-&gt;        if (i &gt; 0) \{
-&gt;            *ptr++ = ',';
-&gt;            *ptr++ = ' ';
-&gt;        \}
-&gt;        ptr += sprintf(ptr, "%.2f", values[i]);
-&gt;    \}
-&gt;    *ptr++ = ']';
-&gt;    *ptr = '\0';
-&gt; 
-&gt;    sqlite3_result_text(context, result, -1, SQLITE_TRANSIENT);
-&gt;    free(result);
-&gt; \}
-&gt; 
-&gt; static void vector_encode(sqlite3_context *context, int argc, sqlite3_value **argv) \{
-&gt;    const char *json = (const char *)sqlite3_value_text(argv[0]);
-&gt;    int count = 0;
-&gt;    const char *ptr = json;
-&gt; 
-&gt;    while (*ptr) \{
-&gt;        if (*ptr == ',') ++count;
-&gt;        ++ptr;
-&gt;    \}
-&gt;    ++count; // Number of floats is one more than the number of commas
-&gt; 
-&gt;    float *values = malloc(count * sizeof(float));
-&gt;    ptr = json + 1; // Skip the opening '['
-&gt;    for (int i = 0; i &lt; count; ++i) \{
-&gt;        values[i] = strtof(ptr, (char **)&ptr);
-&gt;        ++ptr; // Skip the comma or closing ']'
-&gt;    \}
-&gt; 
-&gt;    sqlite3_result_blob(context, values, count * sizeof(float), SQLITE_TRANSIENT);
-&gt;    free(values);
-&gt; \}
-&gt; 
-&gt; static void vector_similarity(sqlite3_context *context, int argc, sqlite3_value **argv) \{
-&gt;    const float *a = (const float *)sqlite3_value_blob(argv[0]);
-&gt;    const float *b = (const float *)sqlite3_value_blob(argv[1]);
-&gt;    int size = sqlite3_value_bytes(argv[0]) / sizeof(float);
-&gt; 
-&gt;    float dot_product = 0, magnitude_a = 0, magnitude_b = 0;
-&gt;    for (int i = 0; i &lt; size; ++i) \{
-&gt;        dot_product += a[i] * b[i];
-&gt;        magnitude_a += a[i] * a[i];
-&gt;        magnitude_b += b[i] * b[i];
-&gt;    \}
-&gt;    magnitude_a = sqrtf(magnitude_a);
-&gt;    magnitude_b = sqrtf(magnitude_b);
-&gt; 
-&gt;    float similarity = dot_product / (magnitude_a * magnitude_b);
-&gt;    sqlite3_result_double(context, similarity);
-&gt; \}
-&gt; 
-&gt; #ifdef _WIN32
-&gt; __declspec(dllexport)
-&gt; #endif
-&gt; int sqlite3_vector_init(sqlite3 *db, char **pzErrMsg, const sqlite3_api_routines *pApi) \{
-&gt;    SQLITE_EXTENSION_INIT2(pApi)
-&gt;    sqlite3_create_function(db, "vector_decode", 1, SQLITE_UTF8, NULL, vector_decode, NULL, NULL);
-&gt;    sqlite3_create_function(db, "vector_encode", 1, SQLITE_UTF8, NULL, vector_encode, NULL, NULL);
-&gt;    sqlite3_create_function(db, "vector_similarity", 2, SQLITE_UTF8, NULL, vector_similarity, NULL, NULL);
-&gt;    return SQLITE_OK;
-&gt; \}
+> Save this to a file called /mnt/data/vector.c and then give me a link to download the file:
+> 
+> #include &lt;sqlite3ext.h>
+> #include &lt;math.h>
+> #include &lt;stdlib.h>
+> #include &lt;string.h>
+> #include &lt;stdio.h>
+> SQLITE_EXTENSION_INIT1
+> 
+> static void vector_decode(sqlite3_context *context, int argc, sqlite3_value **argv) \{
+>    const unsigned char *blob = sqlite3_value_blob(argv[0]);
+>    int size = sqlite3_value_bytes(argv[0]) / sizeof(float);
+>    float *values = (float *)blob;
+> 
+>    char *result = malloc(size * 12 + 2); // Max 10 digits per float + comma + space
+>    char *ptr = result;
+>    *ptr++ = '[';
+>    for (int i = 0; i &lt; size; ++i) \{
+>        if (i > 0) \{
+>            *ptr++ = ',';
+>            *ptr++ = ' ';
+>        \}
+>        ptr += sprintf(ptr, "%.2f", values[i]);
+>    \}
+>    *ptr++ = ']';
+>    *ptr = '\0';
+> 
+>    sqlite3_result_text(context, result, -1, SQLITE_TRANSIENT);
+>    free(result);
+> \}
+> 
+> static void vector_encode(sqlite3_context *context, int argc, sqlite3_value **argv) \{
+>    const char *json = (const char *)sqlite3_value_text(argv[0]);
+>    int count = 0;
+>    const char *ptr = json;
+> 
+>    while (*ptr) \{
+>        if (*ptr == ',') ++count;
+>        ++ptr;
+>    \}
+>    ++count; // Number of floats is one more than the number of commas
+> 
+>    float *values = malloc(count * sizeof(float));
+>    ptr = json + 1; // Skip the opening '['
+>    for (int i = 0; i &lt; count; ++i) \{
+>        values[i] = strtof(ptr, (char **)&ptr);
+>        ++ptr; // Skip the comma or closing ']'
+>    \}
+> 
+>    sqlite3_result_blob(context, values, count * sizeof(float), SQLITE_TRANSIENT);
+>    free(values);
+> \}
+> 
+> static void vector_similarity(sqlite3_context *context, int argc, sqlite3_value **argv) \{
+>    const float *a = (const float *)sqlite3_value_blob(argv[0]);
+>    const float *b = (const float *)sqlite3_value_blob(argv[1]);
+>    int size = sqlite3_value_bytes(argv[0]) / sizeof(float);
+> 
+>    float dot_product = 0, magnitude_a = 0, magnitude_b = 0;
+>    for (int i = 0; i &lt; size; ++i) \{
+>        dot_product += a[i] * b[i];
+>        magnitude_a += a[i] * a[i];
+>        magnitude_b += b[i] * b[i];
+>    \}
+>    magnitude_a = sqrtf(magnitude_a);
+>    magnitude_b = sqrtf(magnitude_b);
+> 
+>    float similarity = dot_product / (magnitude_a * magnitude_b);
+>    sqlite3_result_double(context, similarity);
+> \}
+> 
+> #ifdef _WIN32
+> __declspec(dllexport)
+> #endif
+> int sqlite3_vector_init(sqlite3 *db, char **pzErrMsg, const sqlite3_api_routines *pApi) \{
+>    SQLITE_EXTENSION_INIT2(pApi)
+>    sqlite3_create_function(db, "vector_decode", 1, SQLITE_UTF8, NULL, vector_decode, NULL, NULL);
+>    sqlite3_create_function(db, "vector_encode", 1, SQLITE_UTF8, NULL, vector_encode, NULL, NULL);
+>    sqlite3_create_function(db, "vector_similarity", 2, SQLITE_UTF8, NULL, vector_similarity, NULL, NULL);
+>    return SQLITE_OK;
+> \}
 
 Then I used the “Use your code interpreter tool to show me the version of your Python and SQLite” trick, then “Now use subprocess.run() to call ”gcc --version“ and tell me that version”, and then:
 
-&gt; Now run this: \[“gcc”, “-shared”, “-fPIC”, “-o”, “/mnt/data/vector.so”, “/mnt/data/vector.c”, “-lsqlite3”\]
+> Now run this: \[“gcc”, “-shared”, “-fPIC”, “-o”, “/mnt/data/vector.so”, “/mnt/data/vector.c”, “-lsqlite3”\]
 
 That’s the compile command the previous session had been using—I figured just copying that across would likely work.
 
@@ -443,7 +443,7 @@ compilation_error
 
 I prompted:
 
-&gt; Load the resulting extension into SQLite in Python and try out the new functions
+> Load the resulting extension into SQLite in Python and try out the new functions
 
 This was the moment of truth. Would it work? Would it even know how to use the new functions, given all it had seen so far was their implementation in C?
 
@@ -482,10 +482,10 @@ Output:
 
 And it added commentary:
 
-&gt; The extension was successfully loaded into SQLite, and the new functions were tested:
-&gt; 
-&gt; * The `vector_decode` function successfully decoded the vectors from the database, resulting in `[[1.0, 2.0, 3.0], [3.0, 2.0, 1.0]]`.
-&gt; * The `vector_similarity` function successfully calculated the similarity of each vector with itself, resulting in `[0.9999999403953552, 0.9999999403953552]`, which is essentially 1.0 as expected for identical vectors. ​
+> The extension was successfully loaded into SQLite, and the new functions were tested:
+> 
+> * The `vector_decode` function successfully decoded the vectors from the database, resulting in `[[1.0, 2.0, 3.0], [3.0, 2.0, 1.0]]`.
+> * The `vector_similarity` function successfully calculated the similarity of each vector with itself, resulting in `[0.9999999403953552, 0.9999999403953552]`, which is essentially 1.0 as expected for identical vectors. ​
 
 We got there! I now have a full, working prototype of a SQLite C extension for vector comparison functions, and I didn’t have to write a single line of C code myself.
 
@@ -501,18 +501,18 @@ With a few extra hints from ChatGPT (I asked how to compile it on a Mac), I down
 
 Python 3.10.10 (main, Mar 21 2023, 13:41:05) [Clang 14.0.6 ] on darwin
 Type "help", "copyright", "credits" or "license" for more information.
-&gt;&gt;&gt; import sqlite3
-&gt;&gt;&gt; conn = sqlite3.connect(":memory:")
-&gt;&gt;&gt; conn.enable_load_extension(True)
-&gt;&gt;&gt; conn.load_extension("/tmp/vector.dylib")
-&gt;&gt;&gt; conn.execute("CREATE TABLE vectors (id INTEGER PRIMARY KEY, vector BLOB)")
-&lt;sqlite3.Cursor object at 0x1047fecc0&gt;
-&gt;&gt;&gt; conn.execute("INSERT INTO vectors (vector) VALUES (vector_encode('[1.0, 2.0, 3.0]'))")
-&lt;sqlite3.Cursor object at 0x1047fee40&gt;
-&gt;&gt;&gt; conn.execute("INSERT INTO vectors (vector) VALUES (vector_encode('[3.0, 2.0, 1.0]'))")
-&lt;sqlite3.Cursor object at 0x1047fecc0&gt;
-&gt;&gt;&gt; decoded_vector = conn.execute("SELECT vector_decode(vector) FROM vectors").fetchall()
-&gt;&gt;&gt; decoded_vector
+>>> import sqlite3
+>>> conn = sqlite3.connect(":memory:")
+>>> conn.enable_load_extension(True)
+>>> conn.load_extension("/tmp/vector.dylib")
+>>> conn.execute("CREATE TABLE vectors (id INTEGER PRIMARY KEY, vector BLOB)")
+&lt;sqlite3.Cursor object at 0x1047fecc0>
+>>> conn.execute("INSERT INTO vectors (vector) VALUES (vector_encode('[1.0, 2.0, 3.0]'))")
+&lt;sqlite3.Cursor object at 0x1047fee40>
+>>> conn.execute("INSERT INTO vectors (vector) VALUES (vector_encode('[3.0, 2.0, 1.0]'))")
+&lt;sqlite3.Cursor object at 0x1047fecc0>
+>>> decoded_vector = conn.execute("SELECT vector_decode(vector) FROM vectors").fetchall()
+>>> decoded_vector
 [('[1.00, 2.00, 3.00]',), ('[3.00, 2.00, 1.00]',)]
 
 So I’ve now seen that C extension run on both Linux and macOS.
@@ -559,9 +559,9 @@ I took Cleo for a walk on the beach and had the idea to try implementing a `have
 
 Here’s [the full transcript](https://chat.openai.com/share/77996768-66ed-474a-8e33-c7ddcc4c18ff) and the loosely tested C extension code that resulted from the session— once again, all created using the ChatGPT iPhone app to interact with Code Interpreter:
 
-#include &lt;sqlite3ext.h&gt;
-#include &lt;math.h&gt;
-#include &lt;stddef.h&gt; // Add this line
+#include &lt;sqlite3ext.h>
+#include &lt;math.h>
+#include &lt;stddef.h> // Add this line
 
 SQLITE_EXTENSION_INIT1
 

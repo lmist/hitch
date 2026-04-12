@@ -16,15 +16,15 @@ Here's [the homepage for SLOCCount](https://dwheeler.com/sloccount/) by David A.
 
 I figured it might be fun to try and get it running on the web. Surely someone had compiled Perl to WebAssembly...?
 
-[WebPerl](https://webperl.zero-g.net) by Hauke Dämpfling is exactly that, even adding a neat `&lt;script type="text/perl"&gt;` tag.
+[WebPerl](https://webperl.zero-g.net) by Hauke Dämpfling is exactly that, even adding a neat `&lt;script type="text/perl">` tag.
 
 I told Claude Code for web on my iPhone to figure it out and build something, giving it some hints from my initial research:
 
-&gt; Build sloccount.html - a mobile friendly UI for running the Perl sloccount tool against pasted code or against a GitHub repository that is provided in a form field
-&gt; 
-&gt; It works using the webperl webassembly build of Perl, plus it loads Perl code from this exact commit of this GitHub repository https://github.com/licquia/sloccount/tree/7220ff627334a8f646617fe0fa542d401fb5287e - I guess via the GitHub API, maybe using the https://github.com/licquia/sloccount/archive/7220ff627334a8f646617fe0fa542d401fb5287e.zip URL if that works via CORS
-&gt; 
-&gt; Test it with playwright Python - don’t edit any file other than sloccount.html and a tests/test\_sloccount.py file
+> Build sloccount.html - a mobile friendly UI for running the Perl sloccount tool against pasted code or against a GitHub repository that is provided in a form field
+> 
+> It works using the webperl webassembly build of Perl, plus it loads Perl code from this exact commit of this GitHub repository https://github.com/licquia/sloccount/tree/7220ff627334a8f646617fe0fa542d401fb5287e - I guess via the GitHub API, maybe using the https://github.com/licquia/sloccount/archive/7220ff627334a8f646617fe0fa542d401fb5287e.zip URL if that works via CORS
+> 
+> Test it with playwright Python - don’t edit any file other than sloccount.html and a tests/test\_sloccount.py file
 
 Since I was working on my phone I didn't review the results at all. It seemed to work so I deployed it to static hosting... and then when I went to look at it properly later on found that Claude had given up, cheated and reimplemented it in JavaScript instead!
 

@@ -21,13 +21,13 @@ Here's [what it built](https://tools.simonwillison.net/gif-optimizer), plus an a
 
 Let's address that prompt piece by piece.
 
-&gt; `gif-optimizer.html`
+> `gif-optimizer.html`
 
 The first line simply tells it the name of the file I want to create. Just a filename is enough here - I know that when Claude runs "ls" on the repo it will understand that every file is a different tool.
 
 My [simonw/tools](https://github.com/simonw/tools) repo currently lacks a `CLAUDE.md` or `AGENTS.md` file. I've found that agents pick up enough of the gist of the repo just from scanning the existing file tree and looking at relevant code in existing files.
 
-&gt; `Compile gifsicle to WASM, then build a web page that lets you open or drag-drop an animated GIF onto it and it then shows you that GIF compressed using gifsicle with a number of different settings, each preview with the size and a download button`
+> `Compile gifsicle to WASM, then build a web page that lets you open or drag-drop an animated GIF onto it and it then shows you that GIF compressed using gifsicle with a number of different settings, each preview with the size and a download button`
 
 I'm making a bunch of assumptions here about Claude's existing knowledge, all of which paid off.
 
@@ -63,7 +63,7 @@ Showing the size is important since this is all about optimizing for size.
 
 I know from past experience that asking for a "download button" gets a button with the right HTML and JavaScript mechanisms set up such that clicking it provides a file save dialog, which is a nice convenience over needing to right-click-save-as.
 
-&gt; `Also include controls for the gifsicle options for manual use - each preview has a “tweak these settings” link which sets those manual settings to the ones used for that preview so the user can customize them further`
+> `Also include controls for the gifsicle options for manual use - each preview has a “tweak these settings” link which sets those manual settings to the ones used for that preview so the user can customize them further`
 
 This is a pretty clumsy prompt - I was typing it in my phone after all - but it expressed my intention well enough for Claude to build what I wanted. 
 
@@ -71,7 +71,7 @@ Here's what that looks like in the resulting tool, this screenshot showing the m
 
 ![Screenshot of a GIF Optimizer results and settings panel. At top, results show "110.4 KB (original: 274.0 KB) — 59.7% smaller" in green, with a blue "Download" button and a "Tweak these settings" button. Below is a "Manual Settings" card containing: "Optimization level" dropdown set to "-O3 (aggressive)", "Lossy (0 = off, higher = more loss)" slider set to 0, "Colors (0 = unchanged)" slider set to 0, "Color reduction method" dropdown set to "Default", "Scale (%)" slider set to 100%, "Dither" dropdown set to "Default", and a blue "Optimize with these settings" button.](https://static.simonwillison.net/static/2026/gif-optimizer-tweak.jpg)
 
-&gt; `Run “uvx rodney --help” and use that tool to tray your work - use this GIF for testing https://static.simonwillison.net/static/2026/animated-word-cloud-demo.gif`
+> `Run “uvx rodney --help” and use that tool to tray your work - use this GIF for testing https://static.simonwillison.net/static/2026/animated-word-cloud-demo.gif`
 
 Coding agents work _so much better_ if you make sure they have the ability to test their code while they are working.
 
@@ -81,28 +81,28 @@ There are many different ways to test a web interface - [Playwright](https://pla
 
 This worked great - in [the session transcript](https://claude.ai/code/session%5F01C8JpE3yQpwHfBCFni4ZUc4) you can see Claude using Rodney and fixing some minor bugs that it spotted, for example:
 
-&gt; The CSS `display: none` is winning over the inline style reset. I need to set `display: 'block'` explicitly.
+> The CSS `display: none` is winning over the inline style reset. I need to set `display: 'block'` explicitly.
 
 ## The follow-up prompts
 
 When I'm working with Claude Code I usually keep an eye on what it's doing so I can redirect it while it's still in flight. I also often come up with new ideas while it's working which I then inject into the queue.
 
-&gt; `Include the build script and diff against original gifsicle code in the commit in an appropriate subdirectory`
-&gt; 
-&gt; `The build script should clone the gifsicle repo to /tmp and switch to a known commit before applying the diff - so no copy of gifsicle in the commit but all the scripts needed to build the wqsm`
+> `Include the build script and diff against original gifsicle code in the commit in an appropriate subdirectory`
+> 
+> `The build script should clone the gifsicle repo to /tmp and switch to a known commit before applying the diff - so no copy of gifsicle in the commit but all the scripts needed to build the wqsm`
 
 I added this when I noticed it was putting a _lot_ of effort into figuring out how to get Gifsicle working with WebAssembly, including patching the original source code. Here's [the patch](https://github.com/simonw/tools/blob/main/lib/gifsicle/gifsicle-wasm.patch) and [the build script](https://github.com/simonw/tools/blob/main/lib/gifsicle/build.sh) it added to the repo.
 
 I knew there was a pattern in that repo already for where supporting files lived but I couldn't remember what that pattern was. Saying "in an appropriate subdirectory" was enough for Claude to figure out where to put it - it found and used the existing [lib/ directory](https://github.com/simonw/tools/tree/main/lib).
 
-&gt; `You should include the wasm bundle`
+> `You should include the wasm bundle`
 
 This probably wasn't necessary, but I wanted to make absolutely sure that the compiled WASM file (which turned out [to be 233KB](https://github.com/simonw/tools/blob/main/lib/gifsicle/gifsicle.wasm)) was committed to the repo. I serve `simonw/tools` via GitHub Pages at [tools.simonwillison.net](https://tools.simonwillison.net/) and I wanted it to work without needing to be built locally.
 
-&gt; `Make sure the HTML page credits gifsicle and links to the repo`
+> `Make sure the HTML page credits gifsicle and links to the repo`
 
 This is just polite! I often build WebAssembly wrappers around other people's open source projects and I like to make sure they get credit in the resulting page.
 
 Claude added this to the footer of the tool:
 
-&gt; Built with [gifsicle](https://github.com/kohler/gifsicle) by Eddie Kohler, compiled to WebAssembly. gifsicle is released under the GNU General Public License, version 2.
+> Built with [gifsicle](https://github.com/kohler/gifsicle) by Eddie Kohler, compiled to WebAssembly. gifsicle is released under the GNU General Public License, version 2.

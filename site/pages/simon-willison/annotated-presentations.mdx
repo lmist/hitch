@@ -117,13 +117,13 @@ Anthropic’s [Claude 2](https://claude.ai) was [released last month](https://ww
 
 I pasted it into Claude and tried a few prompts... until I hit upon this one:
 
-&gt; Reformat this transcript into paragraphs and sentences, fix the capitalization and make very light edits such as removing ums
+> Reformat this transcript into paragraphs and sentences, fix the capitalization and make very light edits such as removing ums
 
 ![Claude interface: Taming Large Language Models. I have pasted in a paste.txt file with 42KB of data, then prompted it to reformat. It outputs Here is the reformatted transcript: followed by that transcript.](https://static.simonwillison.net/static/2023/claude-transcript.jpg)
 
 This worked really, really well! Here’s the first paragraph it produced, based on the transcript I show above:
 
-&gt; Okay everyone, it’s really exciting to be here. Yeah I call this talk “Catching Up on the Weird World of LLMs.” I’m going to try and give you the last few years of LLMs developments in 35 minutes. This is impossible, so hopefully I’ll at least give you a flavor of some of the weirder corners of the space. The thing about language models is the more I look at them, the more I think they’re practically interesting. Focus on any particular aspect, and there are just more questions, more unknowns, more interesting things to get into.
+> Okay everyone, it’s really exciting to be here. Yeah I call this talk “Catching Up on the Weird World of LLMs.” I’m going to try and give you the last few years of LLMs developments in 35 minutes. This is impossible, so hopefully I’ll at least give you a flavor of some of the weirder corners of the space. The thing about language models is the more I look at them, the more I think they’re practically interesting. Focus on any particular aspect, and there are just more questions, more unknowns, more interesting things to get into.
 
 Note that I said “fractally interesting”, not “practically interesting”—but that error was there in the YouTube transcript, so Claude picked it up from there.
 
@@ -131,16 +131,16 @@ Here’s the [full generated transcript](https://gist.github.com/simonw/f6d83d69
 
 It’s really impressive! At one point it even turns my dialogue into a set of bullet points:
 
-&gt; Today the best are ChatGPT (aka GPT-3.5 Turbo), GPT-4 for capability, and Claude 2 which is free. Google has PaLM 2 and Bard. Llama and Claude are from Anthropic, a splinter of OpenAI focused on ethics. Google and Meta are the other big players.
-&gt; 
-&gt; Some tips:
-&gt; 
-&gt; * OpenAI models cutoff at September 2021 training data. Anything later isn’t in there. This reduces issues like recycling their own text.
-&gt; * Claude and Palm have more recent data, so I’ll use them for recent events.
-&gt; * Always consider context length. GPT has 4,000 tokens, GPT-4 has 8,000, Claude 100,000.
-&gt; * If a friend who read the Wikipedia article could answer my question, I’m confident feeding it in directly. The more obscure, the more likely pure invention.
-&gt; * Avoid superstitious thinking. Long prompts that “always work” are usually mostly pointless.
-&gt; * Develop an immunity to hallucinations. Notice signs and check answers.
+> Today the best are ChatGPT (aka GPT-3.5 Turbo), GPT-4 for capability, and Claude 2 which is free. Google has PaLM 2 and Bard. Llama and Claude are from Anthropic, a splinter of OpenAI focused on ethics. Google and Meta are the other big players.
+> 
+> Some tips:
+> 
+> * OpenAI models cutoff at September 2021 training data. Anything later isn’t in there. This reduces issues like recycling their own text.
+> * Claude and Palm have more recent data, so I’ll use them for recent events.
+> * Always consider context length. GPT has 4,000 tokens, GPT-4 has 8,000, Claude 100,000.
+> * If a friend who read the Wikipedia article could answer my question, I’m confident feeding it in directly. The more obscure, the more likely pure invention.
+> * Avoid superstitious thinking. Long prompts that “always work” are usually mostly pointless.
+> * Develop an immunity to hallucinations. Notice signs and check answers.
 
 Compare that to [my rambling original](https://gist.github.com/simonw/3d8a335244711c675c456db147aa05fa#file-transcription-txt-L327-L469) to see quite how much of an improvement this is.
 

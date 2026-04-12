@@ -8,9 +8,9 @@ title: Image segmentation using Gemini 2.5
 
 Max Woolf pointed out this new feature of the Gemini 2.5 series (here’s my coverage of [2.5 Pro](https://simonwillison.net/2025/Mar/25/gemini/) and [2.5 Flash](https://simonwillison.net/2025/Apr/17/start-building-with-gemini-25-flash/)) in [a comment](https://news.ycombinator.com/item?id=43720845#43722227) on Hacker News:
 
-&gt; One hidden note from Gemini 2.5 Flash when diving deep into the documentation: for image inputs, not only can the model be instructed to generated 2D bounding boxes of relevant subjects, but it can also [create segmentation masks](https://ai.google.dev/gemini-api/docs/image-understanding#segmentation)!
-&gt; 
-&gt; At this price point with the Flash model, creating segmentation masks is pretty nifty.
+> One hidden note from Gemini 2.5 Flash when diving deep into the documentation: for image inputs, not only can the model be instructed to generated 2D bounding boxes of relevant subjects, but it can also [create segmentation masks](https://ai.google.dev/gemini-api/docs/image-understanding#segmentation)!
+> 
+> At this price point with the Flash model, creating segmentation masks is pretty nifty.
 
 I built a tool last year to [explore Gemini’s bounding box abilities](https://simonwillison.net/2024/Aug/26/gemini-bounding-box-visualization/). This new segmentation mask feature represents a significant new capability!
 
@@ -22,7 +22,7 @@ This is what it can do:
 
 Give it an image and a prompt of the form:
 
-&gt; `Give the segmentation masks for the objects. Output a JSON list of segmentation masks where each entry contains the 2D bounding box in the key "box_2d" and the segmentation mask in key "mask".`
+> `Give the segmentation masks for the objects. Output a JSON list of segmentation masks where each entry contains the 2D bounding box in the key "box_2d" and the segmentation mask in key "mask".`
 
 My tool then runs the prompt and displays the resulting JSON. The Gemini API returns segmentation masks as base64-encoded PNG images in strings that start `data:image/png;base64,iVBOR...`. The tool then visualizes those in a few different ways on the page, including overlaid over the original image.
 
@@ -40,7 +40,7 @@ My initial experiments all used thinking mode. I decided to upgrade the tool to 
 
 On a hunch, I pasted the code into [the new o4-mini-high model](https://simonwillison.net/2025/Apr/16/introducing-openai-o3-and-o4-mini/) in ChatGPT and prompted it with:
 
-&gt; `This code needs to be upgraded to the new recommended JavaScript library from Google. Figure out what that is and then look up enough documentation to port this code to it`
+> `This code needs to be upgraded to the new recommended JavaScript library from Google. Figure out what that is and then look up enough documentation to port this code to it`
 
 o4-mini and o3 both have search tool access and claim to be good at mixing different tool uses together.
 
@@ -66,7 +66,7 @@ We do have one clue here: last year DeepMind [released PaliGemma](https://simonw
 
 The [README for that model](https://github.com/google-research/big%5Fvision/blob/main/big%5Fvision/configs/proj/paligemma/README.md#tokenizer) includes this note about how their tokenizer works:
 
-&gt; PaliGemma uses the Gemma tokenizer with 256,000 tokens, but we further extend its vocabulary with 1024 entries that represent coordinates in normalized image-space (`&lt;loc0000&gt;...&lt;loc1023&gt;`), and another with 128 entries (`&lt;seg000&gt;...&lt;seg127&gt;`) that are codewords used by a lightweight referring-expression segmentation vector-quantized variational auto-encoder (VQ-VAE) \[...\]
+> PaliGemma uses the Gemma tokenizer with 256,000 tokens, but we further extend its vocabulary with 1024 entries that represent coordinates in normalized image-space (`&lt;loc0000>...&lt;loc1023>`), and another with 128 entries (`&lt;seg000>...&lt;seg127>`) that are codewords used by a lightweight referring-expression segmentation vector-quantized variational auto-encoder (VQ-VAE) \[...\]
 
 My guess is that Gemini 2.5 is using a similar approach.
 

@@ -5,104 +5,104 @@ description: explain this to me as if you were harold abelson and gerald sussman
 title: Tool Use, As Explained by Abelson & Sussman
 ---
 
-&gt;
-&gt; explain this to me as if you were harold abelson and gerald sussman
-&gt;
-&gt;
-&gt; ```typescript
-&gt; /**
-&gt; * Single tool, single turn example.
-&gt; * Run with: bun run tool.ts or npx tsx tool.ts
-&gt; */
-&gt;
-&gt;
-&gt; const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://localhost:11434';
-&gt; const MODEL = 'functiongemma';
-&gt;
-&gt;
-&gt; function getWeather(city: string): string \{
-&gt; return JSON.stringify(\{ city, temperature: 22, unit: 'celsius', condition: 'sunny' \});
-&gt; \}
-&gt;
-&gt;
-&gt; const tools = [
-&gt; \{
-&gt; type: 'function',
-&gt; function: \{
-&gt; name: 'get_weather',
-&gt; description: 'Get the current weather for a city.',
-&gt; parameters: \{
-&gt; type: 'object',
-&gt; properties: \{
-&gt; city: \{ type: 'string', description: 'The name of the city' \},
-&gt; \},
-&gt; required: ['city'],
-&gt; \},
-&gt; \},
-&gt; \},
-&gt; ];
-&gt;
-&gt;
-&gt; interface Message \{
-&gt; role: string;
-&gt; content: string;
-&gt; tool_calls?: \{ function: \{ name: string; arguments: Record&lt;string, string&gt; \} \}[];
-&gt; \}
-&gt;
-&gt;
-&gt; interface ChatResponse \{
-&gt; message: Message;
-&gt; \}
-&gt;
-&gt;
-&gt; async function chat(messages: Message[]): Promise&lt;ChatResponse&gt; \{
-&gt; const response = await fetch(`$\{OLLAMA_HOST\}/api/chat`, \{
-&gt; method: 'POST',
-&gt; headers: \{ 'Content-Type': 'application/json' \},
-&gt; body: JSON.stringify(\{ model: MODEL, messages, tools, stream: false \}),
-&gt; \});
-&gt;
-&gt;
-&gt; if (!response.ok) \{
-&gt; throw new Error(`HTTP error: $\{response.status\} $\{await response.text()\}`);
-&gt; \}
-&gt;
-&gt;
-&gt; return response.json();
-&gt; \}
-&gt;
-&gt;
-&gt; async function main() \{
-&gt; const messages: Message[] = [\{ role: 'user', content: 'What is the weather in Paris?' \}];
-&gt; console.log('Prompt:', messages[0].content);
-&gt;
-&gt;
-&gt; const response = await chat(messages);
-&gt;
-&gt;
-&gt; if (response.message.tool_calls?.length) \{
-&gt; const tool = response.message.tool_calls[0];
-&gt; console.log(`Calling: $\{tool.function.name\}($\{JSON.stringify(tool.function.arguments)\})\n`);
-&gt;
-&gt;
-&gt; const result = getWeather(tool.function.arguments.city);
-&gt; console.log('Function Result:', result);
-&gt;
-&gt;
-&gt; messages.push(response.message);
-&gt; messages.push(\{ role: 'tool', content: result \});
-&gt;
-&gt;
-&gt; const final = await chat(messages);
-&gt; console.log('Response:', final.message.content);
-&gt; \} else \{
-&gt; console.log('Response:', response.message.content);
-&gt; \}
-&gt; \}
-&gt;
-&gt;
-&gt; main().catch(console.error);
-&gt; ```
+>
+> explain this to me as if you were harold abelson and gerald sussman
+>
+>
+> ```typescript
+> /**
+> * Single tool, single turn example.
+> * Run with: bun run tool.ts or npx tsx tool.ts
+> */
+>
+>
+> const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://localhost:11434';
+> const MODEL = 'functiongemma';
+>
+>
+> function getWeather(city: string): string {
+> return JSON.stringify({ city, temperature: 22, unit: 'celsius', condition: 'sunny' });
+> }
+>
+>
+> const tools = [
+> {
+> type: 'function',
+> function: {
+> name: 'get_weather',
+> description: 'Get the current weather for a city.',
+> parameters: {
+> type: 'object',
+> properties: {
+> city: { type: 'string', description: 'The name of the city' },
+> },
+> required: ['city'],
+> },
+> },
+> },
+> ];
+>
+>
+> interface Message {
+> role: string;
+> content: string;
+> tool_calls?: { function: { name: string; arguments: Record<string, string> } }[];
+> }
+>
+>
+> interface ChatResponse {
+> message: Message;
+> }
+>
+>
+> async function chat(messages: Message[]): Promise<ChatResponse> {
+> const response = await fetch(`${OLLAMA_HOST}/api/chat`, {
+> method: 'POST',
+> headers: { 'Content-Type': 'application/json' },
+> body: JSON.stringify({ model: MODEL, messages, tools, stream: false }),
+> });
+>
+>
+> if (!response.ok) {
+> throw new Error(`HTTP error: ${response.status} ${await response.text()}`);
+> }
+>
+>
+> return response.json();
+> }
+>
+>
+> async function main() {
+> const messages: Message[] = [{ role: 'user', content: 'What is the weather in Paris?' }];
+> console.log('Prompt:', messages[0].content);
+>
+>
+> const response = await chat(messages);
+>
+>
+> if (response.message.tool_calls?.length) {
+> const tool = response.message.tool_calls[0];
+> console.log(`Calling: ${tool.function.name}(${JSON.stringify(tool.function.arguments)})\n`);
+>
+>
+> const result = getWeather(tool.function.arguments.city);
+> console.log('Function Result:', result);
+>
+>
+> messages.push(response.message);
+> messages.push({ role: 'tool', content: result });
+>
+>
+> const final = await chat(messages);
+> console.log('Response:', final.message.content);
+> } else {
+> console.log('Response:', response.message.content);
+> }
+> }
+>
+>
+> main().catch(console.error);
+> ```
 
 (The lecture hall quiets down. On the chalkboard, a diagram of a feedback loop is already drawn. Hal Abelson adjusts his glasses, while Gerry Sussman leans against the desk, holding a piece of chalk.)
 
@@ -218,7 +218,7 @@ Would you like me to modify this code to handle a 'tool error' (e.g., if the cit
 
 ---
 
-&gt; surely
+> surely
 
 (Gerry Sussman rubs his chin, looking at the previous code on the board.)
 
@@ -370,15 +370,15 @@ Would you like us to wrap this logic into a recursive 'REPL' (Read-Eval-Print Lo
 
 ---
 
-&gt; thank you sir, although that would be an interesting path; i'm more interested in exploring the following:
-&gt;
-&gt;
-&gt; the above is toy example of something we'll likely never really do with an LLM - or maybe so.
-&gt; typically, i would use a weather api and call a function to get it for me, maybe i'd add an llm that calls a tool if im using voice?
-&gt;
-&gt;
-&gt; what's a case where this becomes more realistic?
-&gt; and after that, let's make a bit more complicated perhaps, closer and closer to a real world application; but gently.
+> thank you sir, although that would be an interesting path; i'm more interested in exploring the following:
+>
+>
+> the above is toy example of something we'll likely never really do with an LLM - or maybe so.
+> typically, i would use a weather api and call a function to get it for me, maybe i'd add an llm that calls a tool if im using voice?
+>
+>
+> what's a case where this becomes more realistic?
+> and after that, let's make a bit more complicated perhaps, closer and closer to a real world application; but gently.
 
 (Hal nods enthusiastically, chalk dust settling on his blazer.)
 
@@ -549,8 +549,8 @@ In the real world, you rarely have all the information in one shot. If I say 'Bo
 
 This leads us to The Agentic Loop (or Chain of Thought).
 
-Instead of Input -&gt; Tool -&gt; Response, the pattern becomes:
-Input -&gt; Tool 1 -&gt; Observation -&gt; Tool 2 -&gt; Observation -&gt; Response."
+Instead of Input -> Tool -> Response, the pattern becomes:
+Input -> Tool 1 -> Observation -> Tool 2 -> Observation -> Response."
 
 Hal: "Let us imagine a scenario where the output of one tool is the input for the next. This is Function Chaining."
 
@@ -558,7 +558,7 @@ User: "Refund the last order I made."
 
 Problem: We don't have the Order ID.
 
-Step 1: Call get_last_order(userId) -&gt; Returns ORD-555.
+Step 1: Call get_last_order(userId) -> Returns ORD-555.
 
 Step 2: Call refund_order(ORD-555).
 
@@ -566,13 +566,13 @@ Would you like to see how we implement this 'Chaining' loop, where the model aut
 
 ---
 
-&gt; yes
+> yes
 
 (Gerry Sussman walks over to the blackboard and erases the simple linear diagram. He draws a circle with arrows feeding back into itself.)
 
 Gerry Sussman: "We are now leaving the realm of simple 'stimulus-response' and entering the realm of Cybernetic Feedback Loops.
 
-In our previous example, the path was linear: User -&gt; Model -&gt; Tool -&gt; Answer.
+In our previous example, the path was linear: User -> Model -> Tool -> Answer.
 
 But what if the User says: 'Refund my last order'?
 
@@ -758,8 +758,8 @@ Would you like to discuss how we persist this 'State'—the memory of the conver
 
 ---
 
-&gt; sirs, a level higher in complexity
-&gt; but a more interesting use case, maybe not even business related
+> sirs, a level higher in complexity
+> but a more interesting use case, maybe not even business related
 
 (The blackboard is now covered in diagrams of state machines and graph nodes. Gerry Sussman is pacing excitedly, while Hal Abelson sits on the edge of the desk, looking thoughtful.)
 
@@ -1004,7 +1004,7 @@ Would you like to see how we can make the AI's 'personality' dynamic? For exampl
 
 ---
 
-&gt; i dislike video games
+> i dislike video games
 
 (Gerry Sussman immediately wipes the "Dungeon" diagram off the board with a dusty eraser. He looks serious.)
 
@@ -1242,29 +1242,29 @@ Would you like to see the 'Swarm' pattern? Where one 'Router' LLM coordinates mu
 
 ---
 
-&gt; here's a problem from my daily life.
-&gt;
-&gt;
-&gt; i work with both salesforce and jira.
-&gt; i've written a tool that can go collect my activity from both systems given a datefilter
-&gt; it writes that data into sqlite
-&gt; i'd like to write an agent that can:
-&gt;
-&gt;
-&gt; - give a summary of what i did for the date filter i ran
-&gt; - create highlights of the month for me
-&gt;
-&gt;
-&gt; i usually do something on a case in salesforce, and the salesforce has a jira linked to it
-&gt; and i produce line items
-&gt;
-&gt;
-&gt; like
-&gt; sf number, portal, case type, summary (from sf) and notes at the end
-&gt;
-&gt;
-&gt; such is the case for my daily log
-&gt; and at the end of the month i pick the "top" or most interesting "items"
+> here's a problem from my daily life.
+>
+>
+> i work with both salesforce and jira.
+> i've written a tool that can go collect my activity from both systems given a datefilter
+> it writes that data into sqlite
+> i'd like to write an agent that can:
+>
+>
+> - give a summary of what i did for the date filter i ran
+> - create highlights of the month for me
+>
+>
+> i usually do something on a case in salesforce, and the salesforce has a jira linked to it
+> and i produce line items
+>
+>
+> like
+> sf number, portal, case type, summary (from sf) and notes at the end
+>
+>
+> such is the case for my daily log
+> and at the end of the month i pick the "top" or most interesting "items"
 
 (Hal Abelson leans back, clasping his hands behind his head. He smiles.)
 
@@ -1278,7 +1278,7 @@ Daily Log: A linear mapping. Data→Text.
 
 Monthly Highlights: A filter operation. Data→Data
 ′
- where significance(Data)&gt;Threshold."
+ where significance(Data)>Threshold."
 
 Gerry Sussman: "And notice the constraint! A whole month of data is too large for the 'mind' (context window) of the model if you feed it every raw log.
 

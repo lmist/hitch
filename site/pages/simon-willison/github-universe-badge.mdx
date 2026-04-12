@@ -44,7 +44,7 @@ When I got mine yesterday the official repo had not yet been updated, so I had t
 
 I copied all of the code across to my laptop, added it to a Git repo and then fired up Claude Code and told it:
 
-&gt; `Investigate this code and add a detailed README`
+> `Investigate this code and add a detailed README`
 
 Here’s [the result](https://github.com/simonw/github-universe-2025-badge/blob/15773c7a53275e7836216c3aa9a8a781c06f7859/README.md), which was really useful for getting a start on understanding how it all worked.
 
@@ -54,7 +54,7 @@ There’s also a menu app which powers the home screen. That lives in [apps/menu
 
 I told Claude:
 
-&gt; `Add a new app to it available from the menu which shows network status and other useful debug info about the machine it is running on`
+> `Add a new app to it available from the menu which shows network status and other useful debug info about the machine it is running on`
 
 This was a bit of a long-shot, but it totally worked!
 
@@ -94,11 +94,11 @@ Wouldn’t it be useful to have a REPL in a web UI that you could use to interac
 
 I pointed Claude Code at a copy of that repo and told it:
 
-&gt; `Based on this build a new HTML with inline JavaScript page that uses WebUSB to simply test that the connection to the badge works and then list files on that device using the same mechanism`
+> `Based on this build a new HTML with inline JavaScript page that uses WebUSB to simply test that the connection to the badge works and then list files on that device using the same mechanism`
 
 It took a bit of poking (here’s [the transcript](https://gistpreview.github.io/?13d93a9e3b0ce1c921cd20303f2f1d84)) but the result is now live at [tools.simonwillison.net/badge-repl](https://tools.simonwillison.net/badge-repl). It only works in Chrome—you’ll need to plug the badge in with a USB-C cable and then click “Connect to Badge”.
 
-![Badge Interactive REPL. Note: This tool requires the Web Serial API (Chrome/Edge on desktop). Connect to Badge, Disconnect and Clear Terminal buttons. Then a REPL interface displaying: Ready to connect. Click "Connect to Badge" to start.Traceback (most recent call last):ddae88e91.dirty on 2025-10-20; GitHub Badger with RP2350 Type "help()" for more information.  &gt;&gt;&gt;  MicroPython v1.14-5485.gddae88e91.dirty on 2025-10-20; GitHub Badger with RP2350 Type "help()" for more information. &gt;&gt;&gt; os.listdir() ['icon.py', 'ui.py', 'init.py', '._init.py', '._icon.py'] &gt;&gt;&gt; machine.freq() 200000000 &gt;&gt;&gt; gc.mem_free() 159696 &gt;&gt;&gt; help() Welcome to MicroPython!](https://static.simonwillison.net/static/2025/badge-repl.jpg)
+![Badge Interactive REPL. Note: This tool requires the Web Serial API (Chrome/Edge on desktop). Connect to Badge, Disconnect and Clear Terminal buttons. Then a REPL interface displaying: Ready to connect. Click "Connect to Badge" to start.Traceback (most recent call last):ddae88e91.dirty on 2025-10-20; GitHub Badger with RP2350 Type "help()" for more information.  >>>  MicroPython v1.14-5485.gddae88e91.dirty on 2025-10-20; GitHub Badger with RP2350 Type "help()" for more information. >>> os.listdir() ['icon.py', 'ui.py', 'init.py', '._init.py', '._icon.py'] >>> machine.freq() 200000000 >>> gc.mem_free() 159696 >>> help() Welcome to MicroPython!](https://static.simonwillison.net/static/2025/badge-repl.jpg)
 
 #### Get hacking
 

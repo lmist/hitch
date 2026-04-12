@@ -60,11 +60,11 @@ Claude calls this “Artifacts”, ChatGPT and Gemini both call it “Canvas”.
 
 Try this prompt in Gemini or ChatGPT:
 
-&gt; `Build a canvas that lets me paste in JSON and converts it to YAML. No React.`
+> `Build a canvas that lets me paste in JSON and converts it to YAML. No React.`
 
 Or this prompt in Claude:
 
-&gt; `Build an artifact that lets me paste in JSON and converts it to YAML. No React.`
+> `Build an artifact that lets me paste in JSON and converts it to YAML. No React.`
 
 I always add “No React” to these prompts, because otherwise they tend to build with React, resulting in a file that is harder to copy and paste out of the LLM and use elsewhere. I find that attempts which use React take longer to display (since they need to run a build step) and are more likely to contain crashing bugs for some reason, especially in ChatGPT.
 
@@ -204,7 +204,7 @@ Some examples:
 
 #### Don’t be afraid of opening files
 
-You don’t need to upload a file to a server in order to make use of the `&lt;input type="file"&gt;` element. JavaScript can access the content of that file directly, which opens up a wealth of opportunities for useful functionality.
+You don’t need to upload a file to a server in order to make use of the `&lt;input type="file">` element. JavaScript can access the content of that file directly, which opens up a wealth of opportunities for useful functionality.
 
 Some examples:
 
@@ -264,11 +264,11 @@ The source code of any working tool doubles as clear documentation of how someth
 
 I built **[pypi-changelog](https://tools.simonwillison.net/pypi-changelog)** by telling Claude Code:
 
-&gt; `Look at the pypi package explorer tool`
+> `Look at the pypi package explorer tool`
 
 And then, after it had found and read the source code for [zip-wheel-explorer](https://tools.simonwillison.net/zip-wheel-explorer):
 
-&gt; `Build a new tool pypi-changelog.html which uses the PyPI API to get the wheel URLs of all available versions of a package, then it displays them in a list where each pair has a "Show changes" clickable in between them - clicking on that fetches the full contents of the wheels and displays a nicely rendered diff representing the difference between the two, as close to a standard diff format as you can get with JS libraries from CDNs, and when that is displayed there is a "Copy" button which copies that diff to the clipboard`
+> `Build a new tool pypi-changelog.html which uses the PyPI API to get the wheel URLs of all available versions of a package, then it displays them in a list where each pair has a "Show changes" clickable in between them - clicking on that fetches the full contents of the wheels and displays a nicely rendered diff representing the difference between the two, as close to a standard diff format as you can get with JS libraries from CDNs, and when that is displayed there is a "Copy" button which copies that diff to the clipboard`
 
 Here’s [the full transcript](https://gistpreview.github.io/?9b48fd3f8b99a204ba2180af785c89d2).
 
@@ -288,6 +288,6 @@ In either case I include links to those transcripts in the commit message when I
 
 I’ve had _so much fun_ exploring the capabilities of LLMs in this way over the past year and a half, and building tools in this way has been invaluable in helping me understand both the potential for building tools with HTML and the capabilities of the LLMs that I’m building them with.
 
-If you’re interested in starting your own collection I highly recommend it! All you need to get started is a free GitHub repository with GitHub Pages enabled (Settings -&gt; Pages -&gt; Source -&gt; Deploy from a branch -&gt; main) and you can start copying in `.html` pages generated in whatever manner you like.
+If you’re interested in starting your own collection I highly recommend it! All you need to get started is a free GitHub repository with GitHub Pages enabled (Settings -> Pages -> Source -> Deploy from a branch -> main) and you can start copying in `.html` pages generated in whatever manner you like.
 
 **Bonus transcript**: Here’s [how I used Claude Code](http://gistpreview.github.io/?1b8cba6a8a21110339cbde370e755ba0) and [shot-scraper](https://shot-scraper.datasette.io/) to add the screenshots to this post.

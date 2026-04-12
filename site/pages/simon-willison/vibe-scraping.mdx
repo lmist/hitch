@@ -37,7 +37,7 @@ Codex recently [grew the ability](https://simonwillison.net/2025/Jun/3/codex-age
 
 I started a new task there (using the Codex interface inside the ChatGPT iPhone app) and prompted:
 
-&gt; `Install playwright and use it to visit https://opensauce.com/agenda/ and grab the full details of all three day schedules from the tabs - Friday and Saturday and Sunday - then save and on Data in as much detail as possible in a JSON file and submit that as a PR`
+> `Install playwright and use it to visit https://opensauce.com/agenda/ and grab the full details of all three day schedules from the tabs - Friday and Saturday and Sunday - then save and on Data in as much detail as possible in a JSON file and submit that as a PR`
 
 Codex is frustrating in that you only get one shot: it can go away and work autonomously on a task for a long time, but while it’s working you can’t give it follow-up prompts. You can wait for it to finish entirely and then tell it to try again in a new session, but ideally the instructions you give it are enough for it to get to the finish state where it submits a pull request against your repo with the results.
 
@@ -78,21 +78,21 @@ It took me several false starts to get this to work. The biggest challenge was g
 
 That final option worked! Here’s the full sequence of prompts I used with Claude to get to a working implementation—[full transcript here](https://claude.ai/share/e391bbcc-09a2-4f86-9bec-c6def8fc8dc9):
 
-&gt; `Use your analyst tool to read this JSON file and show me the top level keys`
+> `Use your analyst tool to read this JSON file and show me the top level keys`
 
 This was to prime Claude—I wanted to remind it about its `window.fs.readFile` function and have it read enough of the JSON to understand the structure.
 
-&gt; `Build an artifact with no react that turns the schedule into a nice mobile friendly webpage - there are three days Friday, Saturday and Sunday, which corresponded to the 25th and 26th and 27th of July 2025`
-&gt; 
-&gt; `Don’t copy the raw JSON over to the artifact - use your fs function to read it instead`
-&gt; 
-&gt; `Also include a button to download ICS at the top of the page which downloads a ICS version of the schedule`
+> `Build an artifact with no react that turns the schedule into a nice mobile friendly webpage - there are three days Friday, Saturday and Sunday, which corresponded to the 25th and 26th and 27th of July 2025`
+> 
+> `Don’t copy the raw JSON over to the artifact - use your fs function to read it instead`
+> 
+> `Also include a button to download ICS at the top of the page which downloads a ICS version of the schedule`
 
 I had noticed that the schedule data had keys for “friday” and “saturday” and “sunday” but no indication of the dates, so I told it those. It turned out later I’d got these wrong!
 
 This got me a version of the page that failed with an error, because that `fs.readFile()` couldn’t load the data from the artifact for some reason. So I fixed that with:
 
-&gt; `Change it so instead of using the readFile thing it fetches the same JSON from https://raw.githubusercontent.com/simonw/.github/f671bf57f7c20a4a7a5b0642837811e37c557499/schedule.json`
+> `Change it so instead of using the readFile thing it fetches the same JSON from https://raw.githubusercontent.com/simonw/.github/f671bf57f7c20a4a7a5b0642837811e37c557499/schedule.json`
 
 ... then copied the HTML out to a Gist and previewed it with [gistpreview.github.io](https://gistpreview.github.io/)—here’s [that preview](https://gistpreview.github.io/?06a5d1f3bf0af81d55a411f32b2f37c7).
 
@@ -104,7 +104,7 @@ I’d set myself a deadline of “by the time we drop my friend at the BART stat
 
 Thankfully I have Codex configured against my `simonw/tools` repo as well, so fixing that was a case of prompting a new Codex session with:
 
-&gt; `The open sauce schedule got the dates wrong - Friday is 18 July 2025 and Saturday is 19 and Sunday is 20 - fix it`
+> `The open sauce schedule got the dates wrong - Friday is 18 July 2025 and Saturday is 19 and Sunday is 20 - fix it`
 
 Here’s [that Codex transcript](https://chatgpt.com/s/cd%5F68794c97a3d88191a2cbe9de78103334), which resulted in [this PR](https://github.com/simonw/tools/pull/34) which I landed and deployed, again using the GitHub mobile web interface.
 
@@ -124,7 +124,7 @@ This whole thing was _so much fun!_ Being able to spin up multiple coding agents
 
 Here’s a beautiful cautionary tale about the dangers of vibe-coding on a phone with no access to performance profiling tools. A commenter on Hacker News [pointed out](https://news.ycombinator.com/item?id=44597405#44597808):
 
-&gt; The web app makes 176 requests and downloads 130 megabytes.
+> The web app makes 176 requests and downloads 130 megabytes.
 
 And yeah, it did! Turns out those speaker avatar images weren’t optimized, and there were over 170 of them.
 
@@ -134,20 +134,20 @@ I told [a fresh Codex instance](https://chatgpt.com/s/cd%5F6879631d99c48191b1ab7
 
 That same commenter [on Hacker News](https://news.ycombinator.com/item?id=44597405#44597808):
 
-&gt; It’s also `&lt;div&gt;` soup and largely inaccessible.
+> It’s also `&lt;div>` soup and largely inaccessible.
 
 Yeah, this HTML isn’t great:
 
-dayContainer.innerHTML = sessions.map(session =&gt; `
-    &lt;div class="session-card"&gt;
-        &lt;div class="session-header"&gt;
-            &lt;div&gt;
-                &lt;span class="session-time"&gt;$\{session.time\}&lt;/span&gt;
-                &lt;span class="length-badge"&gt;$\{session.length\} min&lt;/span&gt;
-            &lt;/div&gt;
-            &lt;div class="session-location"&gt;$\{session.where\}&lt;/div&gt;
-        &lt;/div&gt;
+dayContainer.innerHTML = sessions.map(session => `
+    &lt;div class="session-card">
+        &lt;div class="session-header">
+            &lt;div>
+                &lt;span class="session-time">$\{session.time\}&lt;/span>
+                &lt;span class="length-badge">$\{session.length\} min&lt;/span>
+            &lt;/div>
+            &lt;div class="session-location">$\{session.where\}&lt;/div>
+        &lt;/div>
 
-I [opened an issue](https://github.com/simonw/tools/issues/36) and had both Claude Code and Codex look at it. Claude Code [failed to submit a PR](https://github.com/simonw/tools/issues/36#issuecomment-3085516331) for some reason, but Codex [opened one](https://github.com/simonw/tools/pull/37) with a fix that sounded good to me when I tried it with VoiceOver on iOS (using [a Cloudflare Pages preview](https://codex-make-open-sauce-2025-h.tools-b1q.pages.dev/open-sauce-2025)) so I landed that. Here’s [the diff](https://github.com/simonw/tools/commit/29c8298363869bbd4b4e7c51378c20dc8ac30c39), which added a hidden “skip to content” link, some `aria-` attributes on buttons and upgraded the HTML to use `&lt;h3&gt;` for the session titles.
+I [opened an issue](https://github.com/simonw/tools/issues/36) and had both Claude Code and Codex look at it. Claude Code [failed to submit a PR](https://github.com/simonw/tools/issues/36#issuecomment-3085516331) for some reason, but Codex [opened one](https://github.com/simonw/tools/pull/37) with a fix that sounded good to me when I tried it with VoiceOver on iOS (using [a Cloudflare Pages preview](https://codex-make-open-sauce-2025-h.tools-b1q.pages.dev/open-sauce-2025)) so I landed that. Here’s [the diff](https://github.com/simonw/tools/commit/29c8298363869bbd4b4e7c51378c20dc8ac30c39), which added a hidden “skip to content” link, some `aria-` attributes on buttons and upgraded the HTML to use `&lt;h3>` for the session titles.
 
 Next time I’ll remember to specify accessibility as a requirement in the initial prompt. I’m disappointed that Claude didn’t consider that without me having to ask.

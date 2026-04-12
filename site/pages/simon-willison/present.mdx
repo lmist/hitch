@@ -32,7 +32,7 @@ I always have the URLs in a notes file, so I can click back to that and launch t
 
 This was [my starting prompt](https://gisthost.github.io/?639d3c16dcece275af50f028b32480c7/page-001.html#msg-2026-02-21T05-53-43-395Z):
 
-&gt; Build a SwiftUI app for giving presentations where every slide is a URL. The app starts as a window with a webview on the right and a UI on the left for adding, removing and reordering the sequence of URLs. Then you click Play in a menu and the app goes full screen and the left and right keys switch between URLs
+> Build a SwiftUI app for giving presentations where every slide is a URL. The app starts as a window with a webview on the right and a UI on the left for adding, removing and reordering the sequence of URLs. Then you click Play in a menu and the app goes full screen and the left and right keys switch between URLs
 
 That produced a plan. You can see [the transcript that implemented that plan here](https://gisthost.github.io/?bfbc338977ceb71e298e4d4d5ac7d63c).
 
@@ -54,7 +54,7 @@ It’s neat having a remote control for a presentation...
 
 So I prompted:
 
-&gt; Add a web server which listens on 0.0.0.0:9123—the web server serves a single mobile-friendly page with prominent left and right buttons—clicking those buttons switches the slide left and right—there is also a button to start presentation mode or stop depending on the mode it is in.
+> Add a web server which listens on 0.0.0.0:9123—the web server serves a single mobile-friendly page with prominent left and right buttons—clicking those buttons switches the slide left and right—there is also a button to start presentation mode or stop depending on the mode it is in.
 
 I have [Tailscale](https://tailscale.com/) on my laptop and my phone, which means I don’t have to worry about Wi-Fi networks blocking access between the two devices. My phone can access `http://100.122.231.116:9123/` directly from anywhere in the world and control the presentation running on my laptop.
 
@@ -76,10 +76,10 @@ I used this as an opportunity to document a recent pattern I’ve been using: as
 
 The [resulting walkthrough document](https://github.com/simonw/present/blob/main/walkthrough.md) is genuinely useful. It turns out Claude Code decided to implement the web server for the remote control feature [using socket programming without a library](https://github.com/simonw/present/blob/main/walkthrough.md#request-routing)! Here’s the minimal HTTP parser it used for routing:
 
-    private func route(_ raw: String) -&gt; String \{
+    private func route(_ raw: String) -> String \{
         let firstLine = raw.components(separatedBy: "\r\n").first ?? ""
         let parts = firstLine.split(separator: " ")
-        let path = parts.count &gt;= 2 ? String(parts[1]) : "/"
+        let path = parts.count >= 2 ? String(parts[1]) : "/"
 
         switch path \{
         case "/next":

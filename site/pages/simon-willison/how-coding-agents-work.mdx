@@ -66,24 +66,24 @@ A tool is a function that the agent harness makes available to the LLM.
 
 At the level of the prompt itself, that looks something like this:
 
-`system: If you need to access the weather, end your turn with &lt;tool&gt;get_weather(city_name)&lt;/tool&gt;
+`system: If you need to access the weather, end your turn with &lt;tool>get_weather(city_name)&lt;/tool>
 user: what's the weather in San Francisco?
 assistant:
 `
 
 Here the assistant might respond with the following text:
 
-`&lt;tool&gt;get_weather("San Francisco")&lt;/tool&gt;
+`&lt;tool>get_weather("San Francisco")&lt;/tool>
 `
 
 The model harness software then extracts that function call request from the response - probably with a regular expression - and executes the tool.
 
 It then returns the result to the model, with a constructed prompt that looks something like this:
 
-`system: If you need to access the weather, end your turn with &lt;tool&gt;get_weather(city_name)&lt;/tool&gt;
+`system: If you need to access the weather, end your turn with &lt;tool>get_weather(city_name)&lt;/tool>
 user: what's the weather in San Francisco?
-assistant: &lt;tool&gt;get_weather("San Francisco")&lt;/tool&gt;
-user: &lt;tool-result&gt;61°, Partly cloudy&lt;/tool-result&gt;
+assistant: &lt;tool>get_weather("San Francisco")&lt;/tool>
+user: &lt;tool-result>61°, Partly cloudy&lt;/tool-result>
 assistant:
 `
 

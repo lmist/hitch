@@ -23,34 +23,34 @@ It does this by constructing a prompt and dispatching a subagent to perform that
 
 I kicked off a Claude Code session with a screenshot of [a page from my guide](https://simonwillison.net/guides/agentic-engineering-patterns/linear-walkthroughs/changes/) and this prompt:
 
-&gt; Make the chapter diffs also show which characters have changed in this diff view with a darker color of red or green for the individually changed segments of text within the line
+> Make the chapter diffs also show which characters have changed in this diff view with a darker color of red or green for the individually changed segments of text within the line
 
 Here's [the transcript](https://gisthost.github.io/?effbdc564939b88fe5c6299387e217da/index.html) of that session.
 
 Claude Code started by running an “Explore” subagent with the following starter prompt:
 
-&gt; Find the code that implements the diff view for "chapters" in this Django blog. I need to find:
-&gt; 
-&gt; 1. Templates that render diffs (look for diff-related HTML/CSS with red/green backgrounds)
-&gt; 2. Python code that generates diffs (look for difflib usage or similar)
-&gt; 3. Any JavaScript related to diff rendering
-&gt; 4. CSS styles for the diff view (red/green line backgrounds)
-&gt; 
-&gt; Search thoroughly - check templates/, static/, blog/ directories. Look for keywords like "diff", "chapter", "revision", "history", "compare".
+> Find the code that implements the diff view for "chapters" in this Django blog. I need to find:
+> 
+> 1. Templates that render diffs (look for diff-related HTML/CSS with red/green backgrounds)
+> 2. Python code that generates diffs (look for difflib usage or similar)
+> 3. Any JavaScript related to diff rendering
+> 4. CSS styles for the diff view (red/green line backgrounds)
+> 
+> Search thoroughly - check templates/, static/, blog/ directories. Look for keywords like "diff", "chapter", "revision", "history", "compare".
 
 Subagents work similar to any other tool call: the parent agent dispatches them just as they would any other tool and waits for the response. It's interesting to see models prompt themselves in this way - they generally have good taste in prompting strategies.
 
 The Explore subagent churned away for a few seconds and returned a response that started like this:
 
-&gt; Perfect! Now let me create a comprehensive summary with all the findings:
-&gt; 
-&gt; ### Summary: Chapter Diff View Implementation
-&gt; 
-&gt; I found the complete implementation of the diff view for chapters in this Django blog. Here are the key components:
-&gt; 
-&gt; #### 1\. **Python Code - Diff Generation** (`/home/user/simonwillisonblog/guides/views.py`, lines 139-202)
-&gt; 
-&gt; The `chapter_changes()` view function uses Python's built-in `difflib.unified_diff()` to generate diffs: \[…\]
+> Perfect! Now let me create a comprehensive summary with all the findings:
+> 
+> ### Summary: Chapter Diff View Implementation
+> 
+> I found the complete implementation of the diff view for chapters in this Django blog. Here are the key components:
+> 
+> #### 1\. **Python Code - Diff Generation** (`/home/user/simonwillisonblog/guides/views.py`, lines 139-202)
+> 
+> The `chapter_changes()` view function uses Python's built-in `difflib.unified_diff()` to generate diffs: \[…\]
 
 The full subagent response included all of the details the parent agent needed in order to start editing the code to address my original request.
 

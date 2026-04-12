@@ -261,7 +261,9 @@ def escape_mdx(body: str) -> str:
     result = []
     in_code = False
     for line in lines:
-        if line.startswith("```"):
+        # Detect code fences, including inside blockquotes ("> ```")
+        stripped = line.lstrip("> ")
+        if stripped.startswith("```"):
             in_code = not in_code
             result.append(line)
             continue
@@ -270,8 +272,8 @@ def escape_mdx(body: str) -> str:
             continue
         # Escape curly braces
         line = line.replace("{", "\\{").replace("}", "\\}")
-        # Escape all angle brackets — source content is plain markdown, never JSX
-        line = line.replace("<", "&lt;").replace(">", "&gt;")
+        # Escape < only (not >) — > is needed for blockquotes and is harmless in MDX
+        line = line.replace("<", "&lt;")
         # Escape import/export at start of line (MDX treats as JS)
         if re.match(r"^(import|export)\s", line):
             line = "\\" + line

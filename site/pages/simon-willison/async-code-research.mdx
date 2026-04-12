@@ -79,7 +79,7 @@ Here are a some example research projects from the repo.
 
 Here’s the entire prompt I used for that project:
 
-&gt; Create a performance benchmark and feature comparison report on PyPI cmarkgfm compared to other popular Python markdown libraries—check all of them out from github and read the source to get an idea for features, then design and run a benchmark including generating some charts, then create a report in a new python-markdown-comparison folder (do not create a \_summary.md file or edit anywhere outside of that folder). Make sure the performance chart images are directly displayed in the README.md in the folder.
+> Create a performance benchmark and feature comparison report on PyPI cmarkgfm compared to other popular Python markdown libraries—check all of them out from github and read the source to get an idea for features, then design and run a benchmark including generating some charts, then create a report in a new python-markdown-comparison folder (do not create a \_summary.md file or edit anywhere outside of that folder). Make sure the performance chart images are directly displayed in the README.md in the folder.
 
 Note that I didn’t specify any Markdown libraries other than `cmarkgfm`—Claude Code ran a search and found the other six by itself.
 
@@ -87,31 +87,31 @@ Note that I didn’t specify any Markdown libraries other than `cmarkgfm`—Clau
 
 I ran this one using Claude Code on my laptop after an initial attempt failed. The starting prompt was:
 
-&gt; Figure out how to get the cmarkgfm markdown lover _\[typo in prompt, this should have been “library” but it figured it out anyway\]_ for Python working in pyodide. This will be hard because it uses C so you will need to compile it to pyodide compatible webassembly somehow. Write a report on your results plus code to a new cmarkgfm-in-pyodide directory. Test it using pytest to exercise a node.js test script that calls pyodide as seen in the existing node.js and pyodide directory
-&gt; 
-&gt; There is an existing branch that was an initial attempt at this research, but which failed because it did not have Internet access. You do have Internet access. Use that existing branch to accelerate your work, but do not commit any code unless you are certain that you have successfully executed tests that prove that the pyodide module you created works correctly.
+> Figure out how to get the cmarkgfm markdown lover _\[typo in prompt, this should have been “library” but it figured it out anyway\]_ for Python working in pyodide. This will be hard because it uses C so you will need to compile it to pyodide compatible webassembly somehow. Write a report on your results plus code to a new cmarkgfm-in-pyodide directory. Test it using pytest to exercise a node.js test script that calls pyodide as seen in the existing node.js and pyodide directory
+> 
+> There is an existing branch that was an initial attempt at this research, but which failed because it did not have Internet access. You do have Internet access. Use that existing branch to accelerate your work, but do not commit any code unless you are certain that you have successfully executed tests that prove that the pyodide module you created works correctly.
 
 This one gave up half way through, complaining that emscripten would take too long. I told it:
 
-&gt; Complete this project, actually run emscripten, I do not care how long it takes, update the report if it works
+> Complete this project, actually run emscripten, I do not care how long it takes, update the report if it works
 
 It churned away for a bit longer and complained that the existing Python library used CFFI which isn’t available in Pyodide. I asked it:
 
-&gt; Can you figure out how to rewrite cmarkgfm to not use FFI and to use a pyodide-friendly way of integrating that C code instead?
+> Can you figure out how to rewrite cmarkgfm to not use FFI and to use a pyodide-friendly way of integrating that C code instead?
 
 ... and it did. You can [see the full transcript here](https://gistpreview.github.io/?6d778a8f9c4c2c005a189ff308c3bc47).
 
 **[blog-tags-scikit-learn](https://github.com/simonw/research/tree/main/blog-tags-scikit-learn)**. Taking a short break from WebAssembly, I thought it would be fun to put [scikit-learn](https://scikit-learn.org/stable/) through its paces on a text classification task against my blog:
 
-&gt; Work in a new folder called blog-tags-scikit-learn
-&gt; 
-&gt; Download `https://datasette.simonwillison.net/simonwillisonblog.db`—a SQLite database. Take a look at the blog\_entry table and the associated tags—a lot of the earlier entries do not have tags associated with them, where the later entries do. Design, implement and execute models to suggests tags for those earlier entries based on textual analysis against later ones
-&gt; 
-&gt; Use Python scikit learn and try several different strategies
-&gt; 
-&gt; Produce JSON of the results for each one, plus scripts for running them and a detailed markdown description
-&gt; 
-&gt; Also include an HTML page with a nice visualization of the results that works by loading those JSON files.
+> Work in a new folder called blog-tags-scikit-learn
+> 
+> Download `https://datasette.simonwillison.net/simonwillisonblog.db`—a SQLite database. Take a look at the blog\_entry table and the associated tags—a lot of the earlier entries do not have tags associated with them, where the later entries do. Design, implement and execute models to suggests tags for those earlier entries based on textual analysis against later ones
+> 
+> Use Python scikit learn and try several different strategies
+> 
+> Produce JSON of the results for each one, plus scripts for running them and a detailed markdown description
+> 
+> Also include an HTML page with a nice visualization of the results that works by loading those JSON files.
 
 This resulted in seven `.py` files, four `.json` results files and a detailed [report](https://github.com/simonw/research/blob/main/blog-tags-scikit-learn/README.md). (It ignored the bit about an HTML page with a nice visualization for some reason.) Not bad for a few moments of idle curiosity typed into my phone!
 
@@ -125,7 +125,7 @@ My preferred definition of [AI slop](https://simonwillison.net/2024/May/8/slop/)
 
 I want to share the pattern I’m using though, so I decided to keep them quarantined in this one public `simonw/research` repository.
 
-A tiny feature request for GitHub: I’d love to be able to mark a repository as “exclude from search indexes” such that it gets labelled with `&lt;meta name="robots" content="noindex"&gt;` tags. I still like to keep AI-generated content out of search, to avoid contributing more to the [dead internet](https://en.wikipedia.org/wiki/Dead%5FInternet%5Ftheory).
+A tiny feature request for GitHub: I’d love to be able to mark a repository as “exclude from search indexes” such that it gets labelled with `&lt;meta name="robots" content="noindex">` tags. I still like to keep AI-generated content out of search, to avoid contributing more to the [dead internet](https://en.wikipedia.org/wiki/Dead%5FInternet%5Ftheory).
 
 #### Try it yourself
 

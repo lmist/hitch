@@ -48,7 +48,7 @@ I pasted it into [Datasette](https://datasette.io/) (with [datasette-paste](http
 
 That’s not a single polygon! That’s 106 line segments... and they are fascinating. Look at those descriptions:
 
-&gt; thence westerly along the northern line of lots 204 and 203 to the midpoint of the northern line of lot 203
+> thence westerly along the northern line of lots 204 and 203 to the midpoint of the northern line of lot 203
 
 This is utterly delightful. The shapefile description did say “as described in Section 9-0101 of the New York Environmental Conservation Law”, so I guess this is how you write geographically boundaries into law!
 
@@ -58,15 +58,15 @@ I decided to switch models. ChatGPT has access to Code Interpreter, and I happen
 
 I opened a new ChatGPT (with GPT-4) browser tab, uploaded my GeoJSON file and prompted it:
 
-&gt; This GeoJSON file is full of line segments. Use them to create me a single shape that is a Polygon
+> This GeoJSON file is full of line segments. Use them to create me a single shape that is a Polygon
 
-![ChatGPT screenshot - it shows some Python code with a result of &lt;shapely.geometry.polygon.Polygon at 0x7eba83f9fca0 /&gt;, then says: I've created a polygon from the line segments in the GeoJSON file. You can now use this polygon for further analysis or visualization. If you have specific requirements for the polygon or need it in a particular format, please let me know! ​​](https://static.simonwillison.net/static/2024/shapely-chatgpt-1.jpg)
+![ChatGPT screenshot - it shows some Python code with a result of &lt;shapely.geometry.polygon.Polygon at 0x7eba83f9fca0 />, then says: I've created a polygon from the line segments in the GeoJSON file. You can now use this polygon for further analysis or visualization. If you have specific requirements for the polygon or need it in a particular format, please let me know! ​​](https://static.simonwillison.net/static/2024/shapely-chatgpt-1.jpg)
 
 OK, so it wrote some Python code and ran it. But did it work?
 
 I happen to know that Code Interpreter can save files to disk and provide links to download them, so I told it to do that:
 
-&gt; Save it to a GeoJSON file for me to download
+> Save it to a GeoJSON file for me to download
 
 ![ChatGPT screenshot - this time it writes more Python code to define a GeoJSON polygon, then saves that to a file called /mnt/data/polygon.geojson and gives me a link to download it.​​](https://static.simonwillison.net/static/2024/shapely-chatgpt-2.jpg)
 
@@ -76,7 +76,7 @@ I pasted [that](https://gist.github.com/simonw/c1002dbf5249de7addd0b65cb774d3e9)
 
 So I told it to try again. I didn’t think very hard about this prompt, I basically went with a version of “do better”:
 
-&gt; that doesn’t look right to me, check that it has all of the lines in it
+> that doesn’t look right to me, check that it has all of the lines in it
 
 ![ChatGPT screenshot - it writes more Python code and outputs a link to complete_polygon.geojson​​](https://static.simonwillison.net/static/2024/shapely-chatgpt-3.jpg)
 
@@ -88,7 +88,7 @@ This is getting a lot closer! Note how the right hand boundary of the park looks
 
 I had a hunch about the fix. I pasted in a screenshot of where we were so far and added my hunch about the solution:
 
-&gt; That almost works but you need to sort the line segments first, it looked like this:
+> That almost works but you need to sort the line segments first, it looked like this:
 
 Honestly, pasting in the screenshot probably wasn’t necessary here, but it amused me.
 

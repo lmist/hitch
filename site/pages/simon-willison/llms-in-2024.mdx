@@ -114,9 +114,9 @@ Against this photo of butterflies at the California Academy of Sciences:
 
 ![A photo of two butterflies feeding on a red tray](https://static.simonwillison.net/static/2024/butterflies.jpg)
 
-&gt; A shallow dish, likely a hummingbird or butterfly feeder, is red. Pieces of orange slices of fruit are visible inside the dish.
-&gt; 
-&gt; Two butterflies are positioned in the feeder, one is a dark brown/black butterfly with white/cream-colored markings. The other is a large, brown butterfly with patterns of lighter brown, beige, and black markings, including prominent eye spots. The larger brown butterfly appears to be feeding on the fruit.
+> A shallow dish, likely a hummingbird or butterfly feeder, is red. Pieces of orange slices of fruit are visible inside the dish.
+> 
+> Two butterflies are positioned in the feeder, one is a dark brown/black butterfly with white/cream-colored markings. The other is a large, brown butterfly with patterns of lighter brown, beige, and black markings, including prominent eye spots. The larger brown butterfly appears to be feeding on the fruit.
 
 260 input tokens, 92 output tokens. Cost approximately 0.0024 cents (that’s less than a 400th of a cent).
 
@@ -224,15 +224,15 @@ I’m beginning to see the most popular idea of “agents” as dependent on AGI
 
 Anthropic’s [Amanda Askell](https://twitter.com/amandaaskell/status/1866207266761760812) (responsible for much of [the work behind Claude’s Character](https://simonwillison.net/2024/Jun/8/claudes-character/)):
 
-&gt; The boring yet crucial secret behind good system prompts is test-driven development. You don’t write down a system prompt and find ways to test it. You write down tests and find a system prompt that passes them.
+> The boring yet crucial secret behind good system prompts is test-driven development. You don’t write down a system prompt and find ways to test it. You write down tests and find a system prompt that passes them.
 
 It’s become abundantly clear over the course of 2024 that writing good automated evals for LLM-powered systems is **the skill** that’s most needed to build useful applications on top of these models. If you have a strong eval suite you can adopt new models faster, iterate better and build more reliable and useful product features than your competition.
 
 Vercel’s [Malte Ubl](https://twitter.com/cramforce/status/1860436022347075667):
 
-&gt; When [@v0](https://twitter.com/v0) first came out we were paranoid about protecting the prompt with all kinds of pre and post processing complexity.
-&gt; 
-&gt; We completely pivoted to let it rip. A prompt without the evals, models, and especially UX is like getting a broken ASML machine without a manual
+> When [@v0](https://twitter.com/v0) first came out we were paranoid about protecting the prompt with all kinds of pre and post processing complexity.
+> 
+> We completely pivoted to let it rip. A prompt without the evals, models, and especially UX is like getting a broken ASML machine without a manual
 
 I’m _still_ trying to figure out the best patterns for doing this for my own work. Everyone knows that evals are important, but there remains a lack of great guidance for how to best implement them—I’m tracking this under my [evals tag](https://simonwillison.net/tags/evals/). My [SVG pelican riding a bicycle benchmark](https://simonwillison.net/tags/pelican-riding-a-bicycle/) is a pale imitation of what a real eval suite should look like.
 
@@ -322,15 +322,15 @@ The resulting bubbles contributed to several financial crashes, see Wikipedia fo
 
 2024 was the year that the word "[slop](https://simonwillison.net/tags/slop/)" became a term of art. I wrote about this [in May](https://simonwillison.net/2024/May/8/slop/), expanding on this tweet by [@deepfates](https://twitter.com/deepfates/status/1787472784106639418):
 
-&gt; Watching in real time as “slop” becomes a term of art. the way that “spam” became the term for unwanted emails, “slop” is going in the dictionary as the term for unwanted AI generated content
+> Watching in real time as “slop” becomes a term of art. the way that “spam” became the term for unwanted emails, “slop” is going in the dictionary as the term for unwanted AI generated content
 
 I expanded that definition a tiny bit to this:
 
-&gt; **Slop** describes AI-generated content that is both _unrequested_ and _unreviewed_.
+> **Slop** describes AI-generated content that is both _unrequested_ and _unreviewed_.
 
 I ended up getting quoted talking about slop in both [the Guardian](https://www.theguardian.com/technology/article/2024/may/19/spam-junk-slop-the-latest-wave-of-ai-behind-the-zombie-internet) and [the NY Times](https://www.nytimes.com/2024/06/11/style/ai-search-slop.html). Here’s what I said in the NY TImes:
 
-&gt; Society needs concise ways to talk about modern A.I. — both the positives and the negatives. ‘Ignore that email, it’s spam,’ and ‘Ignore that article, it’s slop,’ are both useful lessons.
+> Society needs concise ways to talk about modern A.I. — both the positives and the negatives. ‘Ignore that email, it’s spam,’ and ‘Ignore that article, it’s slop,’ are both useful lessons.
 
 I love the term “slop” because it so succinctly captures one of the ways we should **not** be using generative AI!
 
@@ -346,9 +346,9 @@ That’s clearly not happening. Instead, we are seeing AI labs increasingly trai
 
 One of the best descriptions I’ve seen of this comes from [the Phi-4 technical report](https://simonwillison.net/2024/Dec/15/phi-4-technical-report/), which included this:
 
-&gt; Synthetic data as a substantial component of pretraining is becoming increasingly common, and the Phi series of models has consistently emphasized the importance of synthetic data. Rather than serving as a cheap substitute for organic data, synthetic data has several direct advantages over organic data.
-&gt; 
-&gt; **Structured and Gradual Learning**. In organic datasets, the relationship between tokens is often complex and indirect. Many reasoning steps may be required to connect the current token to the next, making it challenging for the model to learn effectively from next-token prediction. By contrast, each token generated by a language model is by definition predicted by the preceding tokens, making it easier for a model to follow the resulting reasoning patterns.
+> Synthetic data as a substantial component of pretraining is becoming increasingly common, and the Phi series of models has consistently emphasized the importance of synthetic data. Rather than serving as a cheap substitute for organic data, synthetic data has several direct advantages over organic data.
+> 
+> **Structured and Gradual Learning**. In organic datasets, the relationship between tokens is often complex and indirect. Many reasoning steps may be required to connect the current token to the next, making it challenging for the model to learn effectively from next-token prediction. By contrast, each token generated by a language model is by definition predicted by the preceding tokens, making it easier for a model to follow the resulting reasoning patterns.
 
 Another common technique is to use larger models to help create training data for their smaller, cheaper alternatives—a trick used by an increasing number of labs. DeepSeek v3 used “reasoning” data created by DeepSeek-R1\. Meta’s Llama 3.3 70B fine-tuning used [over 25M synthetically generated examples](https://github.com/meta-llama/llama-models/blob/main/models/llama3%5F3/MODEL%5FCARD.md#training-data).
 
