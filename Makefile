@@ -21,7 +21,7 @@ clean:
 	rm -rf build/
 
 dev: site
-	cd site && mint dev
+	cd site && npm run dev
 
 add:
 	@test -n "$(URL)" || (echo "usage: make add URL=https://..." && exit 1)

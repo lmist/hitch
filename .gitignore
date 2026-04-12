@@ -1,6 +1,7 @@
 build/
-site/.mintlify/
 .env
 .playwright-mcp/
 prompt.md
 node_modules/
+site/.next/
+site/out/
