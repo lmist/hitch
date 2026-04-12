@@ -1,0 +1,24 @@
+:root {
+  --warm-bg: #faf6f1;
+  --warm-bg-dark: #1c1917;
+}
+
+html[class~="light"] {
+  background-color: var(--warm-bg);
+}
+
+html[class~="light"] .nextra-sidebar-container {
+  background-color: #f5efe8;
+}
+
+html[class~="light"] .nextra-nav-container-blur {
+  background-color: rgba(250, 246, 241, 0.85);
+}
+
+html[class~="dark"] {
+  background-color: var(--warm-bg-dark);
+}
+
+html[class~="dark"] .nextra-sidebar-container {
+  background-color: #292524;
+}

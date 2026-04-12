@@ -17,8 +17,8 @@ const config: DocsThemeConfig = {
     float: true,
   },
   color: {
-    hue: 239,
-    saturation: 84,
+    hue: 30,
+    saturation: 55,
   },
 }
 
